@@ -1,10 +1,12 @@
-.PHONY: help install setup launch-jupyter check-code fix-code type-check clean
+.PHONY: help install setup launch-jupyter run-adk-web check-code fix-code type-check clean
 
 # Python version
 PYTHON := python3.11
 VENV := .venv
 BIN := $(VENV)/bin
 POETRY := poetry
+AGENTS_DIR := src/agents
+
 
 # Default target
 help:
@@ -14,6 +16,9 @@ help:
 	@echo "  make install        - Install all dependencies with Poetry"
 	@echo "  make setup          - Complete setup (install + create .env)"
 	@echo ""
+	@echo "Running the Agent:"
+	@echo "  make run-adk-web    - Launch ADK Web UI (http://127.0.0.1:8000)"
+	@echo ""
 	@echo "Development Tools:"
 	@echo "  make launch-jupyter - Start Jupyter Notebook"
 	@echo "  make check-code     - Check code with Ruff (no fixes)"
@@ -22,12 +27,6 @@ help:
 	@echo ""
 	@echo "Cleanup:"
 	@echo "  make clean          - Remove virtual environment and cache files"
-	@echo ""
-	@echo "Agent Usage:"
-	@echo "  To run the Data Engineer Agent:"
-	@echo "  1. cd agents"
-	@echo "  2. poetry run adk web --port 8000"
-	@echo "  3. Open http://127.0.0.1:8000 in browser"
 
 # Install dependencies only
 install:
@@ -56,7 +55,7 @@ setup: install
 	@echo "=========================================="
 	@echo "Next steps:"
 	@echo "  1. Edit .env and add your GOOGLE_API_KEY"
-	@echo "  2. cd agents && poetry run adk web --port 8000"
+	@echo "  2. Run 'make run-adk-web' to start the agent"
 	@echo "  3. Open http://127.0.0.1:8000 in your browser"
 	@echo "=========================================="
 
@@ -68,6 +67,18 @@ launch-jupyter:
 	fi
 	@echo "Starting Jupyter Notebook..."
 	$(POETRY) run jupyter notebook
+
+# Launch ADK Web interface
+run-adk-web:
+	@if [ ! -d $(VENV) ]; then \
+		echo "Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "Starting ADK Web UI..."
+	@echo "🚀 Data Engineer Agent will be available at: http://127.0.0.1:8000"
+	@echo "Press Ctrl+C to stop the server"
+	@echo ""
+	$(POETRY) run adk web $(AGENTS_DIR) --port 8000
 
 # Check code with Ruff (no fixes)
 check-code:
