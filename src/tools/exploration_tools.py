@@ -1,6 +1,29 @@
 """Data exploration tools for the data agent."""
 
+from datetime import date, datetime
+from decimal import Decimal
+
 from src.database.connection import get_db_connection
+
+
+def serialize_value(value):
+    """Convert non-JSON-serializable values to JSON-serializable formats.
+
+    Args:
+        value: Any value that might contain date, datetime, or Decimal objects
+
+    Returns:
+        JSON-serializable version of the value
+    """
+    if isinstance(value, (date, datetime)):
+        return value.isoformat()
+    elif isinstance(value, Decimal):
+        return float(value)
+    elif value is None:
+        return None
+    else:
+        return value
+
 
 # Table metadata with business descriptions and quality notes
 TABLE_METADATA = {
@@ -173,10 +196,14 @@ def describe_table(table_name: str) -> dict:
             # Get column names for sample data
             column_names = [col["column_name"] for col in schema]
 
-            # Convert sample rows to list of dicts
+            # Convert sample rows to list of dicts with serializable values
             sample_data = []
             for row in sample_result:
-                sample_data.append(dict(zip(column_names, row)))
+                row_dict = {
+                    col_name: serialize_value(value)
+                    for col_name, value in zip(column_names, row)
+                }
+                sample_data.append(row_dict)
 
             return {
                 "status": "success",
@@ -243,8 +270,11 @@ def get_table_info(table_name: str) -> dict:
             },
         )
 
-        # Reduce sample data to 3 rows instead of 5
-        sample_data = describe_result["sample_data"][:3]
+        # Reduce sample data to 3 rows and ensure all values are serializable
+        sample_data = []
+        for row in describe_result["sample_data"][:3]:
+            serialized_row = {k: serialize_value(v) for k, v in row.items()}
+            sample_data.append(serialized_row)
 
         return {
             "status": "success",
