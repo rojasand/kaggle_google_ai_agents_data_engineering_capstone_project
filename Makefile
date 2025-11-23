@@ -1,4 +1,4 @@
-.PHONY: help install setup launch-jupyter run-adk-web check-code fix-code type-check clean
+.PHONY: help install setup launch-jupyter run-adk-web check-code fix-code type-check clean init-db clean-db
 
 # Python version
 PYTHON := python3.11
@@ -6,6 +6,7 @@ VENV := .venv
 BIN := $(VENV)/bin
 POETRY := poetry
 AGENTS_DIR := src/agents
+DB_PATH := data/data_engineer.db
 
 
 # Default target
@@ -15,9 +16,12 @@ help:
 	@echo "Setup & Installation:"
 	@echo "  make install        - Install all dependencies with Poetry"
 	@echo "  make setup          - Complete setup (install + create .env)"
+	@echo "  make init-db        - Initialize/reinitialize database with sample data"
 	@echo ""
 	@echo "Running the Agent:"
 	@echo "  make run-adk-web    - Launch ADK Web UI (http://127.0.0.1:8000)"
+	@echo "  make run-adk-api    - Launch ADK API Server (http://127.0.0.1:8000)"
+	@echo "  make test-agent     - Test agent with InMemoryRunner (no server needed)"
 	@echo ""
 	@echo "Development Tools:"
 	@echo "  make launch-jupyter - Start Jupyter Notebook"
@@ -27,6 +31,7 @@ help:
 	@echo ""
 	@echo "Cleanup:"
 	@echo "  make clean          - Remove virtual environment and cache files"
+	@echo "  make clean-db       - Remove database files"
 
 # Install dependencies only
 install:
@@ -80,6 +85,19 @@ run-adk-web:
 	@echo ""
 	$(POETRY) run adk web $(AGENTS_DIR) --port 8000
 
+# Launch ADK API Server
+run-adk-api:
+	@if [ ! -d $(VENV) ]; then \
+		echo "Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "Starting ADK API Server..."
+	@echo "🚀 API Server will be available at: http://127.0.0.1:8000"
+	@echo "📡 API Docs available at: http://127.0.0.1:8000/docs"
+	@echo "Press Ctrl+C to stop the server"
+	@echo ""
+	$(POETRY) run adk api_server $(AGENTS_DIR) --port 8000
+
 # Check code with Ruff (no fixes)
 check-code:
 	@if [ ! -d $(VENV) ]; then \
@@ -113,6 +131,41 @@ fix-code:
 	@echo "Running Ruff linter..."
 	$(POETRY) run ruff check src/ --fix
 	@echo "Code fixes complete!"
+
+# Test agent with InMemoryRunner
+test-agent:
+	@if [ ! -d $(VENV) ]; then \
+		echo "Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "Testing agent with InMemoryRunner..."
+	@echo ""
+	$(POETRY) run python test_agent_runner.py
+
+# Initialize database with sample data
+init-db:
+	@if [ ! -d $(VENV) ]; then \
+		echo "Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "Initializing database..."
+	$(POETRY) run python -m src.database.init_db
+	@echo ""
+	@echo "Database initialized successfully!"
+
+# Remove database files
+clean-db:
+	@echo "Removing database files..."
+	@if [ -f $(DB_PATH) ]; then \
+		rm -f $(DB_PATH); \
+		echo "  ✓ Removed $(DB_PATH)"; \
+	else \
+		echo "  - No database file found at $(DB_PATH)"; \
+	fi
+	@if [ -d data/ ]; then \
+		rmdir --ignore-fail-on-non-empty data/ 2>/dev/null || true; \
+	fi
+	@echo "Database cleanup complete"
 
 # Clean up virtual environment and cache files
 clean:
