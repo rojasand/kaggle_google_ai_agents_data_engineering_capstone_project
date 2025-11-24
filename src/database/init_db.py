@@ -261,15 +261,15 @@ def verify_data(conn) -> None:
     logger.info("\nVerifying intentional quality issues:")
 
     # Missing emails
-    missing_emails = conn.execute(
-        "SELECT COUNT(*) FROM customers WHERE email IS NULL"
-    ).fetchone()[0]
+    missing_emails = conn.execute("SELECT COUNT(*) FROM customers WHERE email IS NULL").fetchone()[
+        0
+    ]
     logger.info(f"  ✓ Missing emails: {missing_emails} (~10% of 525 = 52.5)")
 
     # Missing phones
-    missing_phones = conn.execute(
-        "SELECT COUNT(*) FROM customers WHERE phone IS NULL"
-    ).fetchone()[0]
+    missing_phones = conn.execute("SELECT COUNT(*) FROM customers WHERE phone IS NULL").fetchone()[
+        0
+    ]
     logger.info(f"  ✓ Missing phones: {missing_phones} (~5% of 525 = 26.25)")
 
     # Missing product names
@@ -279,9 +279,9 @@ def verify_data(conn) -> None:
     logger.info(f"  ✓ Missing product names: {missing_names} (~8% of 100 = 8)")
 
     # Negative prices
-    negative_prices = conn.execute(
-        "SELECT COUNT(*) FROM products WHERE unit_price < 0"
-    ).fetchone()[0]
+    negative_prices = conn.execute("SELECT COUNT(*) FROM products WHERE unit_price < 0").fetchone()[
+        0
+    ]
     logger.info(f"  ✓ Negative prices: {negative_prices} (~1% of 100 = 1)")
 
     # Orphaned customers

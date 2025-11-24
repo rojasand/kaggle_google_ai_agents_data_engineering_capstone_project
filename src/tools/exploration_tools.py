@@ -91,9 +91,7 @@ def list_tables() -> dict:
             # Get row count for each table
             tables = []
             for (table_name,) in tables_result:
-                count_result = conn.execute(
-                    f"SELECT COUNT(*) FROM {table_name}"
-                ).fetchone()
+                count_result = conn.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()
                 row_count = count_result[0]
 
                 tables.append({"name": table_name, "row_count": row_count})
@@ -157,9 +155,7 @@ def describe_table(table_name: str) -> dict:
                 return {
                     "status": "error",
                     "error_message": f"Table '{table_name}' does not exist",
-                    "available_tables": [
-                        t[0] for t in tables_result
-                    ],  # Original case names
+                    "available_tables": [t[0] for t in tables_result],  # Original case names
                     "message": (
                         f"Table '{table_name}' not found. "
                         "Use list_tables() to see available tables."
@@ -167,9 +163,7 @@ def describe_table(table_name: str) -> dict:
                 }
 
             # Get the actual table name with correct casing
-            actual_table_name = [
-                t[0] for t in tables_result if t[0].lower() == table_name_lower
-            ][0]
+            actual_table_name = [t[0] for t in tables_result if t[0].lower() == table_name_lower][0]
 
             # Get schema information
             schema_result = conn.execute(f"DESCRIBE {actual_table_name}").fetchall()
@@ -185,15 +179,11 @@ def describe_table(table_name: str) -> dict:
                 )
 
             # Get row count
-            count_result = conn.execute(
-                f"SELECT COUNT(*) FROM {actual_table_name}"
-            ).fetchone()
+            count_result = conn.execute(f"SELECT COUNT(*) FROM {actual_table_name}").fetchone()
             row_count = count_result[0]
 
             # Get sample data (5 rows)
-            sample_result = conn.execute(
-                f"SELECT * FROM {actual_table_name} LIMIT 5"
-            ).fetchall()
+            sample_result = conn.execute(f"SELECT * FROM {actual_table_name} LIMIT 5").fetchall()
 
             # Get column names for sample data
             column_names = [col["column_name"] for col in schema]
@@ -202,8 +192,7 @@ def describe_table(table_name: str) -> dict:
             sample_data = []
             for row in sample_result:
                 row_dict = {
-                    col_name: serialize_value(value)
-                    for col_name, value in zip(column_names, row)
+                    col_name: serialize_value(value) for col_name, value in zip(column_names, row)
                 }
                 sample_data.append(row_dict)
 

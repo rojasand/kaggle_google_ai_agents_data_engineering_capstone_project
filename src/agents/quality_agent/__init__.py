@@ -1,4 +1,4 @@
-"""Quality indicators agent module."""
+"""Quality Calculator Agent module."""
 
 from src.agents.quality_agent.agent import root_agent
 

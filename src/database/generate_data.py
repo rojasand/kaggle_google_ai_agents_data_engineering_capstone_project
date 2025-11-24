@@ -47,9 +47,7 @@ def generate_customers(num_customers: int = 500) -> list[dict]:
     # Create indices for quality issues
     missing_email_indices = set(random.sample(range(num_customers), missing_email_count))
     missing_phone_indices = set(random.sample(range(num_customers), missing_phone_count))
-    missing_country_indices = set(
-        random.sample(range(num_customers), missing_country_count)
-    )
+    missing_country_indices = set(random.sample(range(num_customers), missing_country_count))
     future_date_indices = set(random.sample(range(num_customers), future_date_count))
     outlier_indices = set(random.sample(range(num_customers), outlier_count))
 
@@ -231,24 +229,14 @@ def generate_sales_transactions(
     missing_payment_count = int(num_transactions * 0.05)  # 250
 
     # Create indices for quality issues
-    orphaned_customer_indices = set(
-        random.sample(range(num_transactions), orphaned_customer_count)
-    )
-    orphaned_product_indices = set(
-        random.sample(range(num_transactions), orphaned_product_count)
-    )
+    orphaned_customer_indices = set(random.sample(range(num_transactions), orphaned_customer_count))
+    orphaned_product_indices = set(random.sample(range(num_transactions), orphaned_product_count))
     future_date_indices = set(random.sample(range(num_transactions), future_date_count))
-    invalid_discount_indices = set(
-        random.sample(range(num_transactions), invalid_discount_count)
-    )
+    invalid_discount_indices = set(random.sample(range(num_transactions), invalid_discount_count))
     calc_error_indices = set(random.sample(range(num_transactions), calc_error_count))
-    negative_qty_indices = set(
-        random.sample(range(num_transactions), negative_qty_count)
-    )
+    negative_qty_indices = set(random.sample(range(num_transactions), negative_qty_count))
     outlier_qty_indices = set(random.sample(range(num_transactions), outlier_qty_count))
-    missing_payment_indices = set(
-        random.sample(range(num_transactions), missing_payment_count)
-    )
+    missing_payment_indices = set(random.sample(range(num_transactions), missing_payment_count))
 
     for i in range(num_transactions):
         # Customer ID
@@ -297,9 +285,9 @@ def generate_sales_transactions(
             discount_percent = Decimal(str(round(random.uniform(0, 50), 2)))
 
         # Calculate total amount
-        correct_total = (
-            Decimal(quantity) * unit_price * (1 - discount_percent / 100)
-        ).quantize(Decimal("0.01"))
+        correct_total = (Decimal(quantity) * unit_price * (1 - discount_percent / 100)).quantize(
+            Decimal("0.01")
+        )
 
         if i in calc_error_indices:
             # Calculation error: add random error
@@ -376,28 +364,16 @@ if __name__ == "__main__":
     products = generate_products(100)
     print(f"\nGenerated {len(products)} products")
     print(f"  - Missing names: {sum(1 for p in products if p['product_name'] is None)}")
-    print(
-        f"  - Negative prices: {sum(1 for p in products if p['unit_price'] < 0)}"
-    )
-    print(
-        f"  - Negative stock: {sum(1 for p in products if p['stock_quantity'] < 0)}"
-    )
+    print(f"  - Negative prices: {sum(1 for p in products if p['unit_price'] < 0)}")
+    print(f"  - Negative stock: {sum(1 for p in products if p['stock_quantity'] < 0)}")
 
     transactions = generate_sales_transactions(5000, 500, 100)
     print(f"\nGenerated {len(transactions)} transactions")
-    print(
-        f"  - Orphaned customers: {sum(1 for t in transactions if t['customer_id'] > 500)}"
-    )
-    print(
-        f"  - Orphaned products: {sum(1 for t in transactions if t['product_id'] > 100)}"
-    )
+    print(f"  - Orphaned customers: {sum(1 for t in transactions if t['customer_id'] > 500)}")
+    print(f"  - Orphaned products: {sum(1 for t in transactions if t['product_id'] > 100)}")
     print(f"  - Negative quantities: {sum(1 for t in transactions if t['quantity'] < 0)}")
-    print(
-        f"  - Invalid discounts: {sum(1 for t in transactions if t['discount_percent'] > 100)}"
-    )
-    print(
-        f"  - Missing payment: {sum(1 for t in transactions if t['payment_method'] is None)}"
-    )
+    print(f"  - Invalid discounts: {sum(1 for t in transactions if t['discount_percent'] > 100)}")
+    print(f"  - Missing payment: {sum(1 for t in transactions if t['payment_method'] is None)}")
 
     metrics = generate_initial_metrics()
     print(f"\nGenerated {len(metrics)} initial metrics")
