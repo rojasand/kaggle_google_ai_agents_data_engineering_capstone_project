@@ -27,6 +27,10 @@ help:
 	@echo "  make start-data-source  - Start Data Source Agent A2A Server (port 8001)"
 	@echo "  make run-ingestion      - Run Ingestion Agent (interactive mode)"
 	@echo ""
+	@echo "Memory & Sessions:"
+	@echo "  make test-memory    - Run comprehensive memory test suite"
+	@echo "  make clean-sessions - Remove session database (reset conversations)"
+	@echo ""
 	@echo "Development Tools:"
 	@echo "  make launch-jupyter - Start Jupyter Notebook"
 	@echo "  make check-code     - Check code with Ruff (no fixes)"
@@ -83,11 +87,12 @@ run-adk-web:
 		echo "Virtual environment not found. Run 'make install' first."; \
 		exit 1; \
 	fi
-	@echo "Starting ADK Web UI..."
+	@echo "Starting ADK Web UI with persistent sessions..."
 	@echo "🚀 Data Engineer Agent will be available at: http://127.0.0.1:8000"
+	@echo "💾 Sessions stored in: database/agent_sessions.db"
 	@echo "Press Ctrl+C to stop the server"
 	@echo ""
-	$(POETRY) run adk web $(AGENTS_DIR) --port 8000
+	$(POETRY) run adk web $(AGENTS_DIR) --port 8000 --session_service_uri sqlite:///database/agent_sessions.db
 
 # Launch ADK API Server
 run-adk-api:
@@ -95,12 +100,13 @@ run-adk-api:
 		echo "Virtual environment not found. Run 'make install' first."; \
 		exit 1; \
 	fi
-	@echo "Starting ADK API Server..."
+	@echo "Starting ADK API Server with persistent sessions..."
 	@echo "🚀 API Server will be available at: http://127.0.0.1:8000"
 	@echo "📡 API Docs available at: http://127.0.0.1:8000/docs"
+	@echo "💾 Sessions stored in: database/agent_sessions.db"
 	@echo "Press Ctrl+C to stop the server"
 	@echo ""
-	$(POETRY) run adk api_server $(AGENTS_DIR) --port 8000
+	$(POETRY) run adk api_server $(AGENTS_DIR) --port 8000 --session_service_uri sqlite:///database/agent_sessions.db
 
 # Check code with Ruff (no fixes)
 check-code:
@@ -176,6 +182,27 @@ init-db:
 	$(POETRY) run python -m src.database.init_db
 	@echo ""
 	@echo "Database initialized successfully!"
+
+# Test memory and session persistence
+test-memory:
+	@if [ ! -d $(VENV) ]; then \
+		echo "Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "Running memory test suite..."
+	@echo ""
+	$(POETRY) run python examples/test_memory.py
+
+# Remove session database (reset conversations)
+clean-sessions:
+	@echo "Removing session database..."
+	@if [ -f database/agent_sessions.db ]; then \
+		rm -f database/agent_sessions.db; \
+		echo "  ✓ Removed database/agent_sessions.db"; \
+		echo "  All conversations have been reset"; \
+	else \
+		echo "  - No session database found"; \
+	fi
 
 # Remove database files
 clean-db:

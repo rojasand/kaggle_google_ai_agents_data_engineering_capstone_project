@@ -42,6 +42,7 @@ huggingface-hub = ">=0.26.0"
 polars = ">=1.35.0"
 google-adk = {version = "^1.19.0", extras = ["a2a"]}
 faker = "^38.2.0"
+aiosqlite = "^0.21.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.0"

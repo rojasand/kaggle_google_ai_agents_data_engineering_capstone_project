@@ -10,12 +10,16 @@ This project provides a conversational AI agent that helps data engineers with:
 - **Data Exploration**: Ask questions about your data and get instant insights
 - **Correlation Analysis**: Find relationships between variables
 - **Interactive Visualization**: Generate charts and tables on demand
+- **Persistent Memory**: Conversations and context persist across sessions
+- **Smart Context Management**: Automatic conversation summarization every 5 messages
 
 ## Tech Stack
 
 - **Database**: DuckDB (fast analytical database)
 - **Data Processing**: Polars (high-performance DataFrame library)
-- **Agent Framework**: Google Generative AI (Gemini)
+- **Agent Framework**: Google ADK (Agent Development Kit)
+- **LLM**: Google Gemini (via Generative AI)
+- **Memory System**: Persistent sessions with automatic consolidation
 - **Chat Interface**: Gradio (web-based UI)
 - **Visualization**: Plotly (interactive charts)
 - **Logging**: Loguru (simple and powerful logging)
@@ -26,10 +30,12 @@ This project provides a conversational AI agent that helps data engineers with:
 src/
 ├── config/          # Configuration management
 ├── database/        # Database connection, models, and data generation
-├── agents/          # AI agents (orchestrator, quality, pipeline, analytics)
+├── agents/          # AI agents with memory integration
 ├── tools/           # Agent tools (profiling, metrics, queries)
 ├── chat/            # Gradio chat interface
-├── memory/          # Session and conversation memory
+├── memory/          # Persistent memory & session management
+│   ├── persistent_memory.py  # Session/Memory service configuration
+│   └── README.md             # Memory system documentation
 └── observability/   # Logging and metrics
 ```
 
@@ -240,6 +246,102 @@ Examples:
 This A2A implementation follows the patterns from **Day 5A** of the Kaggle AI Agents Course. For more details on Agent2Agent communication, see:
 - [Course Reference Guide](course_notebooks/COURSE_REFERENCE_GUIDE.md#day-5a-agent2agent-communication-day-5a-agent2agent-communicationipynb)
 - [A2A Protocol Specification](https://a2a-protocol.org/)
+
+---
+
+## Memory & Session Management
+
+This project implements **persistent memory** for all agents, enabling context-aware conversations that survive server restarts.
+
+### Features
+
+✅ **Persistent Sessions**: Conversations stored in SQLite (`database/agent_sessions.db`)  
+✅ **Proactive Memory Loading**: Agents automatically preload relevant past context  
+✅ **Automatic Consolidation**: Sessions saved to long-term memory after each response  
+✅ **Smart Compaction**: Conversation history summarized every 5 messages to save tokens  
+✅ **Single User System**: Fixed `USER_ID = "data_engineer_user"` (since you're the only user)  
+✅ **Cross-Session Memory**: Knowledge persists across different conversation threads  
+
+### Architecture
+
+```
+User Message
+    ↓
+Runner (with SessionService + MemoryService)
+    ↓
+Agent (with preload_memory tool)
+    ├─→ Loads relevant memories proactively
+    ├─→ Processes with full context
+    └─→ Generates response
+    ↓
+after_agent_callback
+    └─→ Saves session to memory automatically
+    ↓
+EventsCompactionConfig (every 5 messages)
+    └─→ Summarizes old history to save tokens
+```
+
+### Implementation
+
+All agents now include:
+- `preload_memory` tool for proactive context loading
+- Session persistence via `DatabaseSessionService`
+- Memory storage via `InMemoryMemoryService` (upgradeable to Vertex AI)
+- Automatic compaction via `EventsCompactionConfig(compaction_interval=5)`
+- Automatic consolidation via `after_agent_callback`
+
+### Testing Memory
+
+Run the comprehensive memory test suite:
+
+```bash
+poetry run python examples/test_memory.py
+```
+
+This demonstrates:
+1. Session persistence across runs
+2. Memory preloading in action
+3. Automatic memory consolidation
+4. Conversation compaction after 5 messages
+5. Cross-session memory retrieval
+
+### Memory Files
+
+- **Sessions DB**: `database/agent_sessions.db` (SQLite)
+- **Configuration**: `src/memory/persistent_memory.py`
+- **Documentation**: `src/memory/README.md`
+- **Test Suite**: `examples/test_memory.py`
+
+### How It Works
+
+1. **User sends message** → Runner receives with `USER_ID = "data_engineer_user"`
+2. **Proactive preload** → Agent calls `preload_memory` to fetch relevant context
+3. **Agent processes** → With full context (current session + loaded memories)
+4. **Response sent** → Agent replies with context-aware answer
+5. **Auto-save** → `after_agent_callback` saves session to memory
+6. **Compaction check** → Every 5 messages, old history gets summarized
+
+### Upgrading to Production Memory
+
+For production deployments, upgrade from `InMemoryMemoryService` to:
+
+```python
+from google.adk.memory import VertexAiMemoryBankService
+
+memory_service = VertexAiMemoryBankService(
+    project_id="your-project",
+    location="us-central1",
+    corpus_name="data-engineer-agent-memory"
+)
+```
+
+This provides:
+- Semantic search (meaning-based, not just keywords)
+- Cloud persistence (survives local restarts)
+- Automatic deduplication and consolidation
+- Production-grade scalability
+
+---
 
 ## Sample Data
 

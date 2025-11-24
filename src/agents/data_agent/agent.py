@@ -1,6 +1,7 @@
 """Data exploration agent for database interaction."""
 
 from google.adk.agents import Agent
+from google.adk.tools import preload_memory
 from google.adk.models.google_llm import Gemini
 from google.genai import types
 
@@ -86,5 +87,5 @@ root_agent = Agent(
     ),
     description="A helpful assistant for exploring and understanding database tables",
     instruction=AGENT_INSTRUCTIONS,
-    tools=[list_tables, describe_table, get_table_info],
+    tools=[preload_memory, list_tables, describe_table, get_table_info],
 )

@@ -2,6 +2,7 @@
 
 from google.adk.agents import Agent
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent
+from google.adk.tools import preload_memory
 from google.adk.models.google_llm import Gemini
 from google.genai import types
 
@@ -107,6 +108,7 @@ root_agent = Agent(
     ),
     instruction=AGENT_INSTRUCTIONS,
     tools=[
+        preload_memory,
         load_and_upsert_csv,
         record_pipeline_run,
     ],
