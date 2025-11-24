@@ -224,6 +224,9 @@ __marimo__/
 # Database
 *.db
 
+# Csv files from vendor source
+data_to_ingest/
+
 # plan files
 ai_plan/
 

@@ -23,6 +23,10 @@ help:
 	@echo "  make run-adk-api    - Launch ADK API Server (http://127.0.0.1:8000)"
 	@echo "  make test-agent     - Test agent with InMemoryRunner (no server needed)"
 	@echo ""
+	@echo "Agent2Agent (A2A) Workflow:"
+	@echo "  make start-data-source  - Start Data Source Agent A2A Server (port 8001)"
+	@echo "  make run-ingestion      - Run Ingestion Agent (interactive mode)"
+	@echo ""
 	@echo "Development Tools:"
 	@echo "  make launch-jupyter - Start Jupyter Notebook"
 	@echo "  make check-code     - Check code with Ruff (no fixes)"
@@ -141,6 +145,26 @@ test-agent:
 	@echo "Testing agent with InMemoryRunner..."
 	@echo ""
 	$(POETRY) run python test_agent_runner.py
+
+# Start Data Source Agent A2A Server
+start-data-source:
+	@if [ ! -d $(VENV) ]; then \
+		echo "Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "Starting Data Source Agent A2A Server..."
+	$(POETRY) run python -m src.agents.data_source_agent.server
+
+# Run Ingestion Agent (interactive mode)
+run-ingestion:
+	@if [ ! -d $(VENV) ]; then \
+		echo "Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "Running Ingestion Agent (interactive mode)..."
+	@echo "Make sure Data Source Agent is running on port 8001!"
+	@echo ""
+	$(POETRY) run adk web src/agents/ingestion_agent --port 8002
 
 # Initialize database with sample data
 init-db:

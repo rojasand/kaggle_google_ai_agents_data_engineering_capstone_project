@@ -92,6 +92,155 @@ make clean         # Remove virtual environment and caches
 make clean-db      # Remove database files
 ```
 
+## Agent2Agent (A2A) Data Ingestion
+
+This project demonstrates **Agent2Agent (A2A) communication** following the patterns from the Kaggle AI Agents Course. The A2A architecture enables distributed agent systems where agents communicate over HTTP using a standardized protocol.
+
+### Architecture Overview
+
+The A2A setup consists of two agents:
+
+1. **Data Source Agent** (Mock Vendor)
+   - Exposes data via A2A protocol on port 8001
+   - Generates perfect-quality CSV data on demand
+   - Acts as an external vendor data source
+   - Provides agent card at `http://localhost:8001/.well-known/agent-card.json`
+
+2. **Ingestion Agent** (Data Consumer)
+   - Consumes Data Source Agent via `RemoteA2aAgent`
+   - Orchestrates data ingestion workflow
+   - Validates CSV schemas with Pydantic models
+   - Upserts data into DuckDB database
+   - Records pipeline runs for tracking
+
+### Workflow
+
+```
+┌─────────────────┐         A2A Protocol (HTTP)         ┌─────────────────┐
+│  Ingestion      │  ──────────────────────────────────> │  Data Source    │
+│  Agent          │                                      │  Agent          │
+│  (Port 8002)    │  <────────────────────────────────── │  (Port 8001)    │
+└─────────────────┘         CSV File Path               └─────────────────┘
+         │
+         │ Load & Validate CSV
+         │ (Polars + Pydantic)
+         ▼
+┌─────────────────┐
+│  DuckDB         │
+│  Database       │
+└─────────────────┘
+```
+
+### Running the A2A System
+
+#### Step 1: Start the Data Source Agent (Terminal 1)
+
+```bash
+make start-data-source
+```
+
+This starts the A2A server on port 8001. You should see:
+
+```
+🚀 Starting Data Source Agent A2A Server...
+📍 Server will be available at: http://localhost:8001
+📋 Agent card: http://localhost:8001/.well-known/agent-card.json
+```
+
+Keep this terminal running.
+
+#### Step 2: Start the Ingestion Agent (Terminal 2)
+
+```bash
+make run-ingestion
+```
+
+This launches the Ingestion Agent web UI on port 8002. Open your browser at `http://localhost:8002`.
+
+#### Step 3: Interact with the Ingestion Agent
+
+The Ingestion Agent supports conversational interactions:
+
+**Greeting:**
+```
+User: "Hello"
+Agent: "Hello! I'm the Ingestion Agent. I orchestrate data ingestion from vendor 
+        sources into our data warehouse. I can re-ingest data for customers, 
+        products, or sales_transactions tables for any logic_date."
+```
+
+**Re-ingestion Request:**
+```
+User: "Re-ingest customers data for 2025-11-24"
+Agent: [Calls Data Source Agent via A2A]
+       "I've received the data file at data_to_ingest/customers_2025-11-24.csv"
+       [Validates and upserts data]
+       "Successfully re-ingested customer data! Summary:
+        - Rows processed: 500
+        - Rows inserted: 100
+        - Rows updated: 400
+        - Validation errors: 0"
+```
+
+### How It Works
+
+1. **Data Generation**: When requested, the Data Source Agent generates perfect-quality CSV files matching the database schemas (no missing values, no data errors, valid references)
+
+2. **A2A Communication**: The Ingestion Agent calls the Data Source Agent over HTTP using the A2A protocol, which is framework-agnostic and follows a standard specification
+
+3. **Schema Validation**: Before loading, the Ingestion Agent validates every row against Pydantic models (`Customer`, `Product`, `SalesTransaction`) to ensure data quality
+
+4. **Upsert Logic**: Data is inserted or updated based on primary keys, ensuring idempotent operations
+
+5. **Pipeline Tracking**: Every ingestion operation is recorded in the `pipeline_runs` table with metrics (rows processed, errors, timestamps)
+
+### Available Tables for Ingestion
+
+- **customers**: Customer information (500 rows)
+- **products**: Product catalog (200 rows)
+- **sales_transactions**: Sales records (2000 rows)
+
+### Key Features
+
+✅ **Agent2Agent Protocol**: Standard HTTP-based agent communication  
+✅ **Schema Validation**: Pydantic models ensure data quality  
+✅ **Perfect Quality Data**: Mock vendor provides error-free datasets  
+✅ **Upsert Operations**: Idempotent inserts/updates  
+✅ **Pipeline Tracking**: Full audit trail in `pipeline_runs` table  
+✅ **Conversational Interface**: Natural language interaction  
+
+### Technical Details
+
+**Data Source Agent:**
+- Framework: Google ADK
+- Server: FastAPI (via `to_a2a()`)
+- Data Generation: Polars + Faker
+- Port: 8001
+
+**Ingestion Agent:**
+- Framework: Google ADK
+- A2A Client: `RemoteA2aAgent`
+- Validation: Pydantic models
+- Database: DuckDB (via context manager)
+- Port: 8002 (web UI)
+
+**Generated Files:**
+CSV files are created in `data_to_ingest/` with naming convention:
+```
+{table_name}_{logic_date}.csv
+```
+
+Examples:
+- `customers_2025-11-24.csv`
+- `products_2025-11-24.csv`
+- `sales_transactions_2025-11-24.csv`
+
+### Learn More
+
+This A2A implementation follows the patterns from **Day 5A** of the Kaggle AI Agents Course. For more details on Agent2Agent communication, see:
+- [Course Reference Guide](course_notebooks/COURSE_REFERENCE_GUIDE.md#day-5a-agent2agent-communication-day-5a-agent2agent-communicationipynb)
+- [A2A Protocol Specification](https://a2a-protocol.org/)
+
 ## Sample Data
 
 The database contains realistic e-commerce data with **intentional quality issues** for testing data quality tools:
