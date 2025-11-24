@@ -78,6 +78,18 @@ class PipelineRun(BaseModel):
     run_id: int = Field(..., description="Unique run identifier")
     pipeline_name: str = Field(..., description="Pipeline identifier")
     logic_date: date = Field(..., description="Date being processed")
+
+
+class QueryHistory(BaseModel):
+    """Query history model for tracking SQL queries."""
+
+    query_id: int | None = Field(None, description="Unique query identifier")
+    session_id: str = Field(..., description="Session/user identifier")
+    query_text: str = Field(..., description="The SQL query executed")
+    execution_status: str = Field(..., description="Status: success or error")
+    rows_returned: int | None = Field(None, description="Number of rows returned")
+    error_message: str | None = Field(None, description="Error details if failed")
+    creation_timestamp: date = Field(..., description="When query was executed")
     start_time: datetime = Field(..., description="Pipeline start time")
     end_time: datetime | None = Field(None, description="Pipeline end time")
     status: str = Field(..., description="Run status (success, failed, running)")

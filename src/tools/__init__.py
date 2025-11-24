@@ -6,6 +6,7 @@ from src.tools.quality_tools import (
     get_quality_metrics_by_table,
     list_available_scope_dates,
 )
+from src.tools.query_tools import execute_select_query, get_query_history
 
 __all__ = [
     "list_tables",
@@ -14,4 +15,6 @@ __all__ = [
     "get_quality_metrics_by_scope_date",
     "get_quality_metrics_by_table",
     "list_available_scope_dates",
+    "execute_select_query",
+    "get_query_history",
 ]

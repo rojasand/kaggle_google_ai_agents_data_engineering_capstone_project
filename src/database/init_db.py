@@ -20,6 +20,7 @@ def create_tables(conn) -> None:
 
     # Drop existing tables if they exist
     conn.execute("DROP TABLE IF EXISTS pipeline_runs")
+    conn.execute("DROP TABLE IF EXISTS query_history")
     conn.execute("DROP TABLE IF EXISTS data_quality_metrics")
     conn.execute("DROP TABLE IF EXISTS sales_transactions")
     conn.execute("DROP TABLE IF EXISTS products")
@@ -106,6 +107,20 @@ def create_tables(conn) -> None:
         )
     """)
     logger.info("  ✓ Created pipeline_runs table")
+
+    # Create query_history table
+    conn.execute("""
+        CREATE TABLE query_history (
+            query_id INTEGER PRIMARY KEY,
+            session_id VARCHAR NOT NULL,
+            query_text TEXT NOT NULL,
+            execution_status VARCHAR NOT NULL,
+            rows_returned INTEGER,
+            error_message TEXT,
+            creation_timestamp DATE NOT NULL
+        )
+    """)
+    logger.info("  ✓ Created query_history table")
 
 
 def insert_customers(conn, customers: list[dict]) -> None:
@@ -234,6 +249,7 @@ def verify_data(conn) -> None:
         "sales_transactions",
         "data_quality_metrics",
         "pipeline_runs",
+        "query_history",
     ]
 
     for table in tables:
