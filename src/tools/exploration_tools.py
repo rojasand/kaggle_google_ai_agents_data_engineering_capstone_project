@@ -28,26 +28,28 @@ def serialize_value(value):
 # Table metadata with business descriptions and quality notes
 TABLE_METADATA = {
     "customers": {
-        "description": "Customer master data including contact information and lifetime value",
+        "description": "Customer master data including contact information and lifetime value. Includes scope_date to track when data was ingested.",
         "quality_notes": (
             "Contains intentional quality issues: ~10% missing emails, "
             "~5% missing phones, ~5% duplicate records, ~2% future registration dates, "
-            "~2% outliers in lifetime_value"
+            "~2% outliers in lifetime_value. Use scope_date to identify which day's data has issues."
         ),
     },
     "products": {
-        "description": "Product catalog with pricing, inventory, and supplier information",
+        "description": "Product catalog with pricing, inventory, and supplier information. Includes scope_date to track when data was ingested.",
         "quality_notes": (
             "Contains intentional quality issues: ~8% missing product names, "
-            "~1% negative prices, ~3% price outliers, ~2% negative stock quantities"
+            "~1% negative prices, ~3% price outliers, ~2% negative stock quantities. "
+            "Use scope_date to identify which day's data has issues."
         ),
     },
     "sales_transactions": {
-        "description": "Sales transaction records with customer, product, and payment details",
+        "description": "Sales transaction records with customer, product, and payment details. Includes scope_date to track when data was ingested.",
         "quality_notes": (
             "Contains intentional quality issues: ~2% orphaned customers, "
             "~2% orphaned products, ~1% future dates, ~1% invalid discounts, "
-            "~2% calculation errors, ~1% negative quantities, ~5% missing payment methods"
+            "~2% calculation errors, ~1% negative quantities, ~5% missing payment methods. "
+            "Use scope_date to identify which day's data has issues."
         ),
     },
     "data_quality_metrics": {

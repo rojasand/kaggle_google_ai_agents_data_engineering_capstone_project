@@ -19,6 +19,7 @@ class Customer(BaseModel):
         ..., description="Customer tier (Premium, Standard, Basic, VIP)"
     )
     lifetime_value: Decimal = Field(..., description="Total customer spend")
+    scope_date: date = Field(..., description="Date when this data was ingested/processed")
 
 
 class Product(BaseModel):
@@ -33,6 +34,7 @@ class Product(BaseModel):
     supplier_id: int = Field(..., description="Supplier reference")
     stock_quantity: int = Field(..., description="Current inventory")
     reorder_level: int = Field(..., description="Reorder threshold")
+    scope_date: date = Field(..., description="Date when this data was ingested/processed")
 
 
 class SalesTransaction(BaseModel):
@@ -53,6 +55,7 @@ class SalesTransaction(BaseModel):
         ..., description="Sales channel (Online, Store, Mobile, Phone)"
     )
     region: str = Field(..., description="Sales region")
+    scope_date: date = Field(..., description="Date when this data was ingested/processed")
 
 
 class DataQualityMetric(BaseModel):

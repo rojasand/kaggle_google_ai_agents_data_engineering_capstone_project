@@ -35,7 +35,8 @@ def create_tables(conn) -> None:
             country VARCHAR,
             registration_date DATE NOT NULL,
             customer_segment VARCHAR NOT NULL,
-            lifetime_value DECIMAL(10, 2) NOT NULL
+            lifetime_value DECIMAL(10, 2) NOT NULL,
+            scope_date DATE NOT NULL
         )
     """)
     logger.info("  ✓ Created customers table")
@@ -51,7 +52,8 @@ def create_tables(conn) -> None:
             cost_price DECIMAL(10, 2) NOT NULL,
             supplier_id INTEGER NOT NULL,
             stock_quantity INTEGER NOT NULL,
-            reorder_level INTEGER NOT NULL
+            reorder_level INTEGER NOT NULL,
+            scope_date DATE NOT NULL
         )
     """)
     logger.info("  ✓ Created products table")
@@ -69,7 +71,8 @@ def create_tables(conn) -> None:
             total_amount DECIMAL(10, 2) NOT NULL,
             payment_method VARCHAR,
             sales_channel VARCHAR NOT NULL,
-            region VARCHAR NOT NULL
+            region VARCHAR NOT NULL,
+            scope_date DATE NOT NULL
         )
     """)
     logger.info("  ✓ Created sales_transactions table")
@@ -114,8 +117,8 @@ def insert_customers(conn, customers: list[dict]) -> None:
             """
             INSERT INTO customers (
                 customer_id, customer_name, email, phone, country,
-                registration_date, customer_segment, lifetime_value
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                registration_date, customer_segment, lifetime_value, scope_date
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
             [
                 customer["customer_id"],
@@ -126,6 +129,7 @@ def insert_customers(conn, customers: list[dict]) -> None:
                 customer["registration_date"],
                 customer["customer_segment"],
                 customer["lifetime_value"],
+                customer["scope_date"],
             ],
         )
 
@@ -141,8 +145,8 @@ def insert_products(conn, products: list[dict]) -> None:
             """
             INSERT INTO products (
                 product_id, product_name, category, subcategory, unit_price,
-                cost_price, supplier_id, stock_quantity, reorder_level
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                cost_price, supplier_id, stock_quantity, reorder_level, scope_date
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
             [
                 product["product_id"],
@@ -154,6 +158,7 @@ def insert_products(conn, products: list[dict]) -> None:
                 product["supplier_id"],
                 product["stock_quantity"],
                 product["reorder_level"],
+                product["scope_date"],
             ],
         )
 
@@ -170,8 +175,8 @@ def insert_transactions(conn, transactions: list[dict]) -> None:
             INSERT INTO sales_transactions (
                 transaction_id, customer_id, product_id, transaction_date,
                 quantity, unit_price, discount_percent, total_amount,
-                payment_method, sales_channel, region
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                payment_method, sales_channel, region, scope_date
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
             [
                 transaction["transaction_id"],
@@ -185,6 +190,7 @@ def insert_transactions(conn, transactions: list[dict]) -> None:
                 transaction["payment_method"],
                 transaction["sales_channel"],
                 transaction["region"],
+                transaction["scope_date"],
             ],
         )
 

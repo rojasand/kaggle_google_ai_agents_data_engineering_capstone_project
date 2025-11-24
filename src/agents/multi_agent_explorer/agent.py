@@ -14,7 +14,14 @@ from google.adk.models.google_llm import Gemini
 from google.genai import types
 
 from src.config import settings
-from src.tools import describe_table, get_table_info, list_tables
+from src.tools import (
+    describe_table,
+    get_quality_metrics_by_scope_date,
+    get_quality_metrics_by_table,
+    get_table_info,
+    list_available_scope_dates,
+    list_tables,
+)
 
 # Configure retry logic for rate limiting
 retry_config = types.HttpRetryOptions(
@@ -40,6 +47,8 @@ and decide which database exploration tool to use, OR explain your capabilities 
 is outside your scope.
 
 **Available Tools:**
+
+**Database Exploration:**
 1. list_tables - Use when user asks: "what tables exist", "show tables",
    "list all tables", "what data do you have"
 2. describe_table - Use when user asks about a SPECIFIC table's structure:
@@ -47,15 +56,24 @@ is outside your scope.
 3. get_table_info - Use when user asks for complete info about a table:
    "tell me about customers", "explain the sales_transactions table"
 
+**Quality Metrics:**
+4. list_available_scope_dates - Use when user asks: "what dates have metrics",
+   "when was data ingested", "available scope dates"
+5. get_quality_metrics_by_scope_date - Use when user asks about quality for a date:
+   "quality metrics for 2024-11-24", "show quality on Nov 24"
+6. get_quality_metrics_by_table - Use when user asks about table quality:
+   "quality of customers table", "customers quality metrics"
+
 **Your Response Format:**
 
 If the request matches one of your tools, respond with ONLY a JSON object:
 
 ```json
 {
-  "tool_name": "list_tables|describe_table|get_table_info",
+  "tool_name": "list_tables|describe_table|get_table_info|list_available_scope_dates|get_quality_metrics_by_scope_date|get_quality_metrics_by_table",
   "parameters": {
-    "table_name": "table_name_here_if_needed"
+    "table_name": "table_name_if_needed",
+    "scope_date": "YYYY-MM-DD_if_needed"
   },
   "reasoning": "brief explanation of why this tool was chosen"
 }
@@ -101,6 +119,36 @@ Response:
   "tool_name": "get_table_info",
   "parameters": {"table_name": "products"},
   "reasoning": "User wants complete information including business context"
+}
+```
+
+User: "What dates have quality metrics?"
+Response:
+```json
+{
+  "tool_name": "list_available_scope_dates",
+  "parameters": {},
+  "reasoning": "User wants to see available scope dates with metrics"
+}
+```
+
+User: "Show quality metrics for 2024-11-24"
+Response:
+```json
+{
+  "tool_name": "get_quality_metrics_by_scope_date",
+  "parameters": {"scope_date": "2024-11-24"},
+  "reasoning": "User wants all quality metrics for specific date"
+}
+```
+
+User: "How is the quality of customers table?"
+Response:
+```json
+{
+  "tool_name": "get_quality_metrics_by_table",
+  "parameters": {"table_name": "customers"},
+  "reasoning": "User wants quality metrics for customers table"
 }
 ```
 
@@ -159,26 +207,55 @@ specified in the tool selection, or return a capabilities message if the request
       "tool": "get_table_info",
       "description": "Get complete information about a table including business context",
       "example": "Tell me about the products table"
+    },
+    {
+      "tool": "list_available_scope_dates",
+      "description": "Show all dates that have quality metrics available",
+      "example": "What dates have quality metrics?"
+    },
+    {
+      "tool": "get_quality_metrics_by_scope_date",
+      "description": "Show quality metrics for a specific date",
+      "example": "Show quality metrics for 2024-11-24"
+    },
+    {
+      "tool": "get_quality_metrics_by_table",
+      "description": "Show quality metrics for a specific table",
+      "example": "How is the quality of customers table?"
     }
   ]
 }
 ```
 
-3. If tool_name is valid (list_tables, describe_table, or get_table_info):
-   - Extract any required parameters (like table_name)
-   - Call the appropriate tool using the tools available to you
+3. If tool_name is valid, extract parameters and call the appropriate tool:
+   - list_tables(): No parameters
+   - describe_table(table_name): Needs table_name
+   - get_table_info(table_name): Needs table_name
+   - list_available_scope_dates(): No parameters
+   - get_quality_metrics_by_scope_date(scope_date): Needs scope_date
+   - get_quality_metrics_by_table(table_name, scope_date): Needs table_name, optional scope_date
    - Return the EXACT JSON response from the tool without modification
 
 **Available Tools:**
 - list_tables(): Returns list of all tables with row counts
 - describe_table(table_name): Returns schema and sample data for a specific table
 - get_table_info(table_name): Returns complete info including business context
+- list_available_scope_dates(): Returns all dates with quality metrics
+- get_quality_metrics_by_scope_date(scope_date): Returns metrics for a date
+- get_quality_metrics_by_table(table_name, scope_date=None): Returns metrics for a table
 
 **Important:**
 - For out_of_scope requests, return the capabilities JSON (do NOT call tools)
 - For valid requests, call the tool and return its exact JSON output
 - Do not add explanations or modify the JSON structure""",
-    tools=[list_tables, describe_table, get_table_info],
+    tools=[
+        list_tables,
+        describe_table,
+        get_table_info,
+        list_available_scope_dates,
+        get_quality_metrics_by_scope_date,
+        get_quality_metrics_by_table,
+    ],
     output_key="json_response",
 )
 
@@ -235,6 +312,32 @@ Convert this JSON into a friendly, informative narrative that:
    - Show sample data with context
    - Provide insights about what users can learn from this table
 
+4. **For list_available_scope_dates responses:**
+   - Start with: "I found quality metrics for X dates"
+   - List the dates in a clear format (most recent first)
+   - Explain what scope_date means (date when data was ingested)
+   - Suggest how to explore specific dates
+
+5. **For get_quality_metrics_by_scope_date responses:**
+   - Start with: "Here are the quality metrics for [date]"
+   - Group metrics by table
+   - For each metric, explain:
+     * What it measures (completeness, accuracy, etc.)
+     * The score (0-1 scale, higher is better)
+     * Whether it's good (>0.95) or needs attention (<0.95)
+   - Highlight any concerning metrics
+   - Provide actionable insights
+
+6. **For get_quality_metrics_by_table responses:**
+   - Start with: "Here's the quality overview for [table_name]"
+   - If multiple dates, show trend over time
+   - For each metric:
+     * Explain what it measures
+     * Show the score and status
+     * Indicate if quality is improving or declining
+   - Summarize overall table health
+   - Suggest next steps if issues found
+
 **Style Guidelines:**
 - Be conversational and friendly
 - Use proper formatting (markdown tables, bullet points, headers)
@@ -263,9 +366,22 @@ Here's what I CAN help you with:
    Get full information about a table including business context and quality notes
    *Try asking:* "Tell me about the products table"
 
+📅 **List Available Quality Dates**
+   Show all dates that have quality metrics
+   *Try asking:* "What dates have quality metrics?"
+
+📈 **Get Quality Metrics by Date**
+   Show quality metrics for a specific scope_date
+   *Try asking:* "Show quality metrics for 2024-11-24"
+
+🎯 **Get Quality Metrics by Table**
+   Show quality metrics for a specific table
+   *Try asking:* "How is the quality of customers table?"
+
 Feel free to ask me any of these questions!"
 
-Remember: Your goal is to make technical data accessible and easy to understand!""",
+Remember: Your goal is to make technical data accessible and easy to understand!
+For quality metrics, explain scores in plain language and highlight issues that need attention.""",
     output_key="final_narrative",
 )
 

@@ -1,5 +1,17 @@
 """Tools module for data agent."""
 
 from src.tools.exploration_tools import describe_table, get_table_info, list_tables
+from src.tools.quality_tools import (
+    get_quality_metrics_by_scope_date,
+    get_quality_metrics_by_table,
+    list_available_scope_dates,
+)
 
-__all__ = ["list_tables", "describe_table", "get_table_info"]
+__all__ = [
+    "list_tables",
+    "describe_table",
+    "get_table_info",
+    "get_quality_metrics_by_scope_date",
+    "get_quality_metrics_by_table",
+    "list_available_scope_dates",
+]

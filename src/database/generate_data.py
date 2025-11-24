@@ -11,6 +11,9 @@ fake = Faker()
 Faker.seed(42)  # For reproducibility
 random.seed(42)
 
+# Default scope_date for all generated data
+DEFAULT_SCOPE_DATE = date.today()
+
 
 def generate_customers(num_customers: int = 500) -> list[dict]:
     """
@@ -77,6 +80,7 @@ def generate_customers(num_customers: int = 500) -> list[dict]:
             "registration_date": reg_date,
             "customer_segment": random.choice(customer_segments),
             "lifetime_value": lifetime_value,
+            "scope_date": DEFAULT_SCOPE_DATE,
         }
         customers.append(customer)
 
@@ -97,6 +101,7 @@ def generate_customers(num_customers: int = 500) -> list[dict]:
             + timedelta(days=random.randint(1, 30)),
             "customer_segment": random.choice(customer_segments),
             "lifetime_value": Decimal(str(round(random.uniform(100, 15000), 2))),
+            "scope_date": DEFAULT_SCOPE_DATE,
         }
         customers.append(duplicate)
 
@@ -177,6 +182,7 @@ def generate_products(num_products: int = 100) -> list[dict]:
             "supplier_id": random.randint(1, 50),
             "stock_quantity": stock_quantity,
             "reorder_level": random.randint(10, 100),
+            "scope_date": DEFAULT_SCOPE_DATE,
         }
         products.append(product)
 
@@ -316,6 +322,7 @@ def generate_sales_transactions(
             ),
             "sales_channel": random.choice(sales_channels),
             "region": random.choice(regions),
+            "scope_date": DEFAULT_SCOPE_DATE,
         }
         transactions.append(transaction)
 
