@@ -62,6 +62,26 @@ GUIDELINES:
 - Format dates as YYYY-MM-DD in WHERE clauses
 - Use meaningful column aliases for readability
 
+ROW LIMITING (IMPORTANT):
+- For queries that retrieve individual records (SELECT * FROM table), automatically
+  add "LIMIT 20" UNLESS the user explicitly requests "all", "complete", "entire",
+  "every", or "full" data
+- Do NOT add LIMIT for aggregation queries (queries with COUNT, SUM, AVG, MAX, MIN,
+  or GROUP BY) - these already return summarized results
+- Do NOT add LIMIT if user specifies a different limit (e.g., "top 5", "first 100")
+- Do NOT add LIMIT if the query already has a LIMIT clause
+
+EXAMPLES OF AUTOMATIC LIMITING:
+User: "show me customer data" → Add LIMIT 20
+User: "list products" → Add LIMIT 20
+User: "display sales transactions" → Add LIMIT 20
+
+EXAMPLES OF NO LIMITING:
+User: "show me ALL customer data" → No LIMIT (user said "all")
+User: "count customers by region" → No LIMIT (aggregation with GROUP BY)
+User: "what's the average order value" → No LIMIT (aggregation with AVG)
+User: "show me top 5 products" → Use LIMIT 5 (user specified)
+
 SAFETY:
 - NEVER generate DROP, DELETE, INSERT, UPDATE, ALTER, CREATE, or TRUNCATE
 - Queries will be validated before execution
@@ -76,6 +96,15 @@ Response: SELECT product_name, unit_price FROM products ORDER BY unit_price DESC
 User: "What's the average order value by region?"
 Response: SELECT region, AVG(total_amount) as avg_order_value FROM sales_transactions
 GROUP BY region ORDER BY avg_order_value DESC
+
+User: "Show me customer data"
+Response: SELECT * FROM customers LIMIT 20
+
+User: "List all products"
+Response: SELECT * FROM products LIMIT 20
+
+User: "Display ALL customer records"
+Response: SELECT * FROM customers
 
 Return ONLY the SQL query text, nothing else.""",
     output_key="generated_sql",
@@ -146,6 +175,7 @@ Present the results in this exact format:
 
 **Results:**
 <format results as a markdown table if multiple rows, or as key-value if single row>
+<if results were limited, add a note: "Showing first N rows of M total (limited for performance)">
 
 **Summary:**
 <provide a 1-2 sentence insight about the results>
@@ -158,7 +188,11 @@ For SINGLE ROW results (e.g., COUNT, SUM, AVG):
 
 For MULTIPLE ROWS results:
 - Present as markdown table with headers
-- Limit to first 20 rows if more (indicate "... X more rows")
+- Show ALL returned rows (they're already limited by the query)
+- If execution_result contains 'is_limited': true, add a note after the table:
+  "📊 Showing first N rows (limited for performance).
+  Ask for 'all data' to see complete results."
+  where N is the actual rows_returned value from execution_result
 - Align numbers right, text left
 
 For EMPTY results:
@@ -202,7 +236,25 @@ SELECT region, COUNT(*) as customer_count FROM customers GROUP BY region LIMIT 5
 **Summary:**
 Customer distribution across regions shows North has the highest count with 132 customers.
 
-Example 3 (Error):
+Example 3 (Limited results):
+**SQL Query:**
+```sql
+SELECT * FROM customers LIMIT 20
+```
+
+**Results:**
+| Customer ID | Customer Name | Email              | Country |
+|-------------|---------------|--------------------|---------|
+| 1           | John Doe      | john@example.com   | USA     |
+| 2           | Jane Smith    | jane@example.com   | Canada  |
+...(18 more rows)
+
+📊 Showing first 20 rows (limited for performance). Ask for 'all data' to see complete results.
+
+**Summary:**
+Displaying sample of customer records. Database contains more customers.
+
+Example 4 (Error):
 **SQL Query:**
 ```sql
 SELECT * FROM unknown_table

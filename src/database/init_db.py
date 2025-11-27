@@ -6,12 +6,7 @@ from loguru import logger
 
 from src.config import settings
 from src.database.connection import get_db_connection
-from src.database.generate_data import (
-    generate_customers,
-    generate_initial_metrics,
-    generate_products,
-    generate_sales_transactions,
-)
+from src.database.generate_data import generate_all_data_with_timeline
 
 
 def create_tables(conn) -> None:
@@ -257,62 +252,70 @@ def verify_data(conn) -> None:
         count = result[0]
         logger.info(f"  ✓ {table}: {count} rows")
 
-    # Verify quality issues
-    logger.info("\nVerifying intentional quality issues:")
-
-    # Missing emails
-    missing_emails = conn.execute("SELECT COUNT(*) FROM customers WHERE email IS NULL").fetchone()[
-        0
-    ]
-    logger.info(f"  ✓ Missing emails: {missing_emails} (~10% of 525 = 52.5)")
-
-    # Missing phones
-    missing_phones = conn.execute("SELECT COUNT(*) FROM customers WHERE phone IS NULL").fetchone()[
-        0
-    ]
-    logger.info(f"  ✓ Missing phones: {missing_phones} (~5% of 525 = 26.25)")
-
-    # Missing product names
-    missing_names = conn.execute(
-        "SELECT COUNT(*) FROM products WHERE product_name IS NULL"
+    # Verify quality issues by phase
+    logger.info("\nVerifying intentional quality issues by phase:")
+    
+    # Phase 1 (2025-01-01) - Faulty data
+    logger.info("\n  Phase 1 (2025-01-01) - FAULTY DATA:")
+    
+    phase1_customers = conn.execute(
+        "SELECT COUNT(*) FROM customers WHERE scope_date = '2025-01-01'"
     ).fetchone()[0]
-    logger.info(f"  ✓ Missing product names: {missing_names} (~8% of 100 = 8)")
-
-    # Negative prices
-    negative_prices = conn.execute("SELECT COUNT(*) FROM products WHERE unit_price < 0").fetchone()[
-        0
-    ]
-    logger.info(f"  ✓ Negative prices: {negative_prices} (~1% of 100 = 1)")
-
-    # Orphaned customers
-    orphaned_customers = conn.execute(
+    missing_emails_p1 = conn.execute(
+        "SELECT COUNT(*) FROM customers WHERE email IS NULL AND scope_date = '2025-01-01'"
+    ).fetchone()[0]
+    logger.info(f"    ✓ Customers: {phase1_customers}, Missing emails: {missing_emails_p1}")
+    
+    phase1_products = conn.execute(
+        "SELECT COUNT(*) FROM products WHERE scope_date = '2025-01-01'"
+    ).fetchone()[0]
+    missing_names_p1 = conn.execute(
+        "SELECT COUNT(*) FROM products WHERE product_name IS NULL AND scope_date = '2025-01-01'"
+    ).fetchone()[0]
+    logger.info(f"    ✓ Products: {phase1_products}, Missing names: {missing_names_p1}")
+    
+    phase1_transactions = conn.execute(
+        "SELECT COUNT(*) FROM sales_transactions WHERE scope_date = '2025-01-01'"
+    ).fetchone()[0]
+    orphaned_customers_p1 = conn.execute(
         """
-        SELECT COUNT(*) FROM sales_transactions
-        WHERE customer_id NOT IN (SELECT customer_id FROM customers)
+        SELECT COUNT(*) FROM sales_transactions t
+        WHERE t.scope_date = '2025-01-01'
+        AND t.customer_id NOT IN (SELECT customer_id FROM customers)
     """
     ).fetchone()[0]
-    logger.info(f"  ✓ Orphaned customers: {orphaned_customers} (~2% of 5000 = 100)")
-
-    # Orphaned products
-    orphaned_products = conn.execute(
+    logger.info(f"    ✓ Transactions: {phase1_transactions}, Orphaned customers: {orphaned_customers_p1}")
+    
+    # Phase 2 (2025-02-01) - Corrected data
+    logger.info("\n  Phase 2 (2025-02-01) - CORRECTED DATA:")
+    
+    phase2_customers = conn.execute(
+        "SELECT COUNT(*) FROM customers WHERE scope_date = '2025-02-01'"
+    ).fetchone()[0]
+    missing_emails_p2 = conn.execute(
+        "SELECT COUNT(*) FROM customers WHERE email IS NULL AND scope_date = '2025-02-01'"
+    ).fetchone()[0]
+    logger.info(f"    ✓ Customers: {phase2_customers}, Missing emails: {missing_emails_p2} (should be 0)")
+    
+    phase2_products = conn.execute(
+        "SELECT COUNT(*) FROM products WHERE scope_date = '2025-02-01'"
+    ).fetchone()[0]
+    missing_names_p2 = conn.execute(
+        "SELECT COUNT(*) FROM products WHERE product_name IS NULL AND scope_date = '2025-02-01'"
+    ).fetchone()[0]
+    logger.info(f"    ✓ Products: {phase2_products}, Missing names: {missing_names_p2} (should be 0)")
+    
+    phase2_transactions = conn.execute(
+        "SELECT COUNT(*) FROM sales_transactions WHERE scope_date = '2025-02-01'"
+    ).fetchone()[0]
+    orphaned_customers_p2 = conn.execute(
         """
-        SELECT COUNT(*) FROM sales_transactions
-        WHERE product_id NOT IN (SELECT product_id FROM products)
+        SELECT COUNT(*) FROM sales_transactions t
+        WHERE t.scope_date = '2025-02-01'
+        AND t.customer_id NOT IN (SELECT customer_id FROM customers)
     """
     ).fetchone()[0]
-    logger.info(f"  ✓ Orphaned products: {orphaned_products} (~2% of 5000 = 100)")
-
-    # Invalid discounts
-    invalid_discounts = conn.execute(
-        "SELECT COUNT(*) FROM sales_transactions WHERE discount_percent > 100"
-    ).fetchone()[0]
-    logger.info(f"  ✓ Invalid discounts: {invalid_discounts} (~1% of 5000 = 50)")
-
-    # Missing payment methods
-    missing_payments = conn.execute(
-        "SELECT COUNT(*) FROM sales_transactions WHERE payment_method IS NULL"
-    ).fetchone()[0]
-    logger.info(f"  ✓ Missing payment methods: {missing_payments} (~5% of 5000 = 250)")
+    logger.info(f"    ✓ Transactions: {phase2_transactions}, Orphaned customers: {orphaned_customers_p2} (should be 0)")
 
 
 def initialize_database() -> None:
@@ -334,12 +337,11 @@ def initialize_database() -> None:
             # Create tables
             create_tables(conn)
 
-            # Generate data
-            logger.info("\nGenerating sample data with quality issues...")
-            customers = generate_customers(500)
-            products = generate_products(100)
-            transactions = generate_sales_transactions(5000, 500, 100)
-            metrics = generate_initial_metrics()
+            # Generate data using two-phase timeline (faulty -> corrected)
+            logger.info("\nGenerating sample data with two-phase timeline...")
+            logger.info("  Phase 1: Faulty data (2025-01-01)")
+            logger.info("  Phase 2: Corrected data (2025-02-01)")
+            customers, products, transactions, metrics = generate_all_data_with_timeline()
 
             # Insert data
             logger.info("\nInserting data into database...")

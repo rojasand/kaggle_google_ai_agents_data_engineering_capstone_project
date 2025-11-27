@@ -51,6 +51,13 @@ class Settings(BaseSettings):
         description="Application name",
     )
 
+    # Query Configuration
+    default_row_limit: int = Field(
+        default=20,
+        alias="DEFAULT_ROW_LIMIT",
+        description="Default row limit for SQL queries (0 = no limit)",
+    )
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

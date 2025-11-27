@@ -17,6 +17,7 @@ help:
 	@echo "  make install        - Install all dependencies with Poetry"
 	@echo "  make setup          - Complete setup (install + create .env)"
 	@echo "  make init-db        - Initialize/reinitialize database with sample data"
+	@echo "  make verify-data    - Verify data generation implementation"
 	@echo ""
 	@echo "Running the Agent:"
 	@echo "  make run-adk-web    - Launch ADK Web UI (http://127.0.0.1:8000)"
@@ -182,6 +183,16 @@ init-db:
 	$(POETRY) run python -m src.database.init_db
 	@echo ""
 	@echo "Database initialized successfully!"
+
+# Verify data generation implementation
+verify-data:
+	@if [ ! -d $(VENV) ]; then \
+		echo "Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "Verifying data generation implementation..."
+	@echo ""
+	$(POETRY) run python verify_implementation.py
 
 # Test memory and session persistence
 test-memory:
