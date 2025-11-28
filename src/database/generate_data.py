@@ -41,7 +41,7 @@ def generate_customers(num_customers: int = 500, scope_date: date = None) -> lis
     """
     if scope_date is None:
         scope_date = DEFAULT_SCOPE_DATE
-    
+
     customers = []
     customer_segments = ["Premium", "Standard", "Basic", "VIP"]
     countries = ["USA", "Canada", "UK", "Germany", "France", "Australia", "Japan"]
@@ -138,7 +138,7 @@ def generate_products(num_products: int = 100, scope_date: date = None) -> list[
     """
     if scope_date is None:
         scope_date = DEFAULT_SCOPE_DATE
-    
+
     products = []
     categories = {
         "Electronics": ["Laptops", "Smartphones", "Tablets", "Accessories"],
@@ -235,16 +235,21 @@ def generate_sales_transactions(
     """
     if scope_date is None:
         scope_date = DEFAULT_SCOPE_DATE
-    
+
     # Backward compatibility: if old parameters passed, create dummy data
     if customers is None:
-        customers = [{"customer_id": i+1, "registration_date": CUSTOMER_REG_START} for i in range(500)]
+        customers = [
+            {"customer_id": i + 1, "registration_date": CUSTOMER_REG_START} for i in range(500)
+        ]
     if products is None:
-        products = [{"product_id": i+1, "unit_price": Decimal(str(random.uniform(10, 500)))} for i in range(100)]
-    
+        products = [
+            {"product_id": i + 1, "unit_price": Decimal(str(random.uniform(10, 500)))}
+            for i in range(100)
+        ]
+
     num_customers = len(customers)
     num_products = len(products)
-    
+
     transactions = []
     sales_channels = ["Online", "Store", "Mobile", "Phone"]
     regions = ["North", "South", "East", "West", "Central"]
@@ -385,7 +390,7 @@ def generate_initial_metrics(logic_date: date = None) -> list[dict]:
     """
     if logic_date is None:
         logic_date = date.today()
-    
+
     current_time = datetime.now()
 
     metrics = [
@@ -417,10 +422,10 @@ def generate_all_data_with_timeline() -> tuple[list[dict], list[dict], list[dict
     Generate all data with a two-phase timeline:
     1. Faulty data batch (scope_date = 2025-01-01)
     2. Corrected data batch (scope_date = 2025-02-01)
-    
+
     This creates a realistic scenario where initial data has quality issues,
     and a later batch has corrections applied.
-    
+
     Returns:
         Tuple of (all_customers, all_products, all_transactions, all_metrics)
     """
@@ -428,47 +433,49 @@ def generate_all_data_with_timeline() -> tuple[list[dict], list[dict], list[dict
     all_products = []
     all_transactions = []
     all_metrics = []
-    
+
     # Phase 1: Generate FAULTY data (2025-01-01)
     faulty_scope_date = date(2025, 1, 1)
     logger_msg = "Generating Phase 1: FAULTY data (scope_date=2025-01-01)"
     print(f"\n{'='*70}")
     print(logger_msg)
     print(f"{'='*70}")
-    
+
     faulty_customers = generate_customers(num_customers=500, scope_date=faulty_scope_date)
     faulty_products = generate_products(num_products=100, scope_date=faulty_scope_date)
     faulty_transactions = generate_sales_transactions(
         num_transactions=5000,
         customers=faulty_customers,
         products=faulty_products,
-        scope_date=faulty_scope_date
+        scope_date=faulty_scope_date,
     )
     faulty_metrics = generate_initial_metrics(logic_date=faulty_scope_date)
-    
+
     all_customers.extend(faulty_customers)
     all_products.extend(faulty_products)
     all_transactions.extend(faulty_transactions)
     all_metrics.extend(faulty_metrics)
-    
-    print(f"Phase 1 complete: {len(faulty_customers)} customers, {len(faulty_products)} products, {len(faulty_transactions)} transactions")
-    
+
+    print(
+        f"Phase 1 complete: {len(faulty_customers)} customers, {len(faulty_products)} products, {len(faulty_transactions)} transactions"
+    )
+
     # Phase 2: Generate CORRECTED data (2025-02-01)
     corrected_scope_date = date(2025, 2, 1)
     logger_msg = "Generating Phase 2: CORRECTED data (scope_date=2025-02-01)"
     print(f"\n{'='*70}")
     print(logger_msg)
     print(f"{'='*70}")
-    
+
     # Temporarily modify random seed to generate corrected data
     original_seed_state = random.getstate()
     random.seed(100)  # Different seed for corrected data
     fake.seed_instance(100)
-    
+
     # Generate corrected customers (start with ID offset to avoid duplicates)
     corrected_customers = []
     customer_id_offset = len(all_customers)
-    
+
     # Generate fewer quality issues for corrected batch
     num_corrected_customers = 500
     for i in range(num_corrected_customers):
@@ -477,19 +484,21 @@ def generate_all_data_with_timeline() -> tuple[list[dict], list[dict], list[dict
             "customer_name": fake.name(),
             "email": fake.email(),  # Always present (fixed)
             "phone": fake.phone_number(),  # Always present (fixed)
-            "country": random.choice(["USA", "Canada", "UK", "Germany", "France", "Australia", "Japan"]),
+            "country": random.choice(
+                ["USA", "Canada", "UK", "Germany", "France", "Australia", "Japan"]
+            ),
             "registration_date": corrected_scope_date - timedelta(days=random.randint(1, 30)),
             "customer_segment": random.choice(["Premium", "Standard", "Basic", "VIP"]),
             "lifetime_value": Decimal(str(round(random.uniform(100, 15000), 2))),
             "scope_date": corrected_scope_date,
         }
         corrected_customers.append(customer)
-    
+
     # Generate corrected products (start with ID offset)
     corrected_products = []
     product_id_offset = len(all_products)
     num_corrected_products = 100
-    
+
     categories = {
         "Electronics": ["Laptops", "Smartphones", "Tablets", "Accessories"],
         "Clothing": ["Men", "Women", "Kids", "Shoes"],
@@ -497,13 +506,15 @@ def generate_all_data_with_timeline() -> tuple[list[dict], list[dict], list[dict
         "Sports": ["Fitness", "Outdoor", "Team Sports", "Athletic Wear"],
         "Books": ["Fiction", "Non-Fiction", "Educational", "Children"],
     }
-    
+
     for i in range(num_corrected_products):
         category = random.choice(list(categories.keys()))
         subcategory = random.choice(categories[category])
         unit_price = Decimal(str(round(random.uniform(10, 500), 2)))
-        cost_price = (unit_price * Decimal(str(random.uniform(0.70, 0.90)))).quantize(Decimal("0.01"))
-        
+        cost_price = (unit_price * Decimal(str(random.uniform(0.70, 0.90)))).quantize(
+            Decimal("0.01")
+        )
+
         product = {
             "product_id": product_id_offset + i + 1,
             "product_name": fake.catch_phrase(),  # Always present (fixed)
@@ -517,25 +528,25 @@ def generate_all_data_with_timeline() -> tuple[list[dict], list[dict], list[dict
             "scope_date": corrected_scope_date,
         }
         corrected_products.append(product)
-    
+
     # Generate corrected transactions (no orphaned records)
     # Use ALL customers and products (both faulty and corrected batches)
     all_available_customers = all_customers + corrected_customers
     all_available_products = all_products + corrected_products
-    
+
     corrected_transactions = []
     transaction_id_offset = len(all_transactions)
     num_corrected_transactions = 5000
-    
+
     for i in range(num_corrected_transactions):
         # Always use valid customers and products (no orphans)
         customer = random.choice(all_available_customers)
         product = random.choice(all_available_products)
-        
+
         customer_id = customer["customer_id"]
         product_id = product["product_id"]
         customer_reg_date = customer["registration_date"]
-        
+
         # Transaction date: between customer registration and DATA_END_DATE
         start_date = max(customer_reg_date, corrected_scope_date)
         if start_date < DATA_END_DATE:
@@ -546,19 +557,23 @@ def generate_all_data_with_timeline() -> tuple[list[dict], list[dict], list[dict
                 trans_date = start_date
         else:
             trans_date = DATA_END_DATE
-        
+
         # Normal quantities (no negatives, fewer outliers)
         quantity = random.randint(1, 20)
-        
+
         # Use actual product price
-        unit_price = (product["unit_price"] * Decimal(str(random.uniform(0.95, 1.05)))).quantize(Decimal("0.01"))
-        
+        unit_price = (product["unit_price"] * Decimal(str(random.uniform(0.95, 1.05)))).quantize(
+            Decimal("0.01")
+        )
+
         # Normal discount (0-50%)
         discount_percent = Decimal(str(round(random.uniform(0, 50), 2)))
-        
+
         # Correct calculation
-        total_amount = (Decimal(quantity) * unit_price * (1 - discount_percent / 100)).quantize(Decimal("0.01"))
-        
+        total_amount = (Decimal(quantity) * unit_price * (1 - discount_percent / 100)).quantize(
+            Decimal("0.01")
+        )
+
         transaction = {
             "transaction_id": transaction_id_offset + i + 1,
             "customer_id": customer_id,
@@ -574,14 +589,14 @@ def generate_all_data_with_timeline() -> tuple[list[dict], list[dict], list[dict
             "scope_date": corrected_scope_date,
         }
         corrected_transactions.append(transaction)
-    
+
     # Restore original random state
     random.setstate(original_seed_state)
-    
+
     all_customers.extend(corrected_customers)
     all_products.extend(corrected_products)
     all_transactions.extend(corrected_transactions)
-    
+
     # Generate metrics for corrected batch
     corrected_metrics = [
         {
@@ -604,31 +619,35 @@ def generate_all_data_with_timeline() -> tuple[list[dict], list[dict], list[dict
         },
     ]
     all_metrics.extend(corrected_metrics)
-    
-    print(f"Phase 2 complete: {len(corrected_customers)} customers, {len(corrected_products)} products, {len(corrected_transactions)} transactions")
-    print(f"\nTotal: {len(all_customers)} customers, {len(all_products)} products, {len(all_transactions)} transactions, {len(all_metrics)} metrics")
-    
+
+    print(
+        f"Phase 2 complete: {len(corrected_customers)} customers, {len(corrected_products)} products, {len(corrected_transactions)} transactions"
+    )
+    print(
+        f"\nTotal: {len(all_customers)} customers, {len(all_products)} products, {len(all_transactions)} transactions, {len(all_metrics)} metrics"
+    )
+
     return all_customers, all_products, all_transactions, all_metrics
 
 
 if __name__ == "__main__":
     # Test data generation with timeline
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("TESTING TWO-PHASE DATA GENERATION")
-    print("="*70)
-    
+    print("=" * 70)
+
     customers, products, transactions, metrics = generate_all_data_with_timeline()
-    
-    print(f"\n" + "="*70)
+
+    print("\n" + "=" * 70)
     print("QUALITY ANALYSIS")
-    print("="*70)
-    
+    print("=" * 70)
+
     # Analyze Phase 1 (faulty) data
-    phase1_customers = [c for c in customers if c['scope_date'] == date(2025, 1, 1)]
-    phase1_products = [p for p in products if p['scope_date'] == date(2025, 1, 1)]
-    phase1_transactions = [t for t in transactions if t['scope_date'] == date(2025, 1, 1)]
-    
-    print(f"\nPhase 1 (2025-01-01) - FAULTY DATA:")
+    phase1_customers = [c for c in customers if c["scope_date"] == date(2025, 1, 1)]
+    phase1_products = [p for p in products if p["scope_date"] == date(2025, 1, 1)]
+    phase1_transactions = [t for t in transactions if t["scope_date"] == date(2025, 1, 1)]
+
+    print("\nPhase 1 (2025-01-01) - FAULTY DATA:")
     print(f"  Customers: {len(phase1_customers)}")
     print(f"    - Missing emails: {sum(1 for c in phase1_customers if c['email'] is None)}")
     print(f"    - Missing phones: {sum(1 for c in phase1_customers if c['phone'] is None)}")
@@ -637,14 +656,16 @@ if __name__ == "__main__":
     print(f"    - Negative prices: {sum(1 for p in phase1_products if p['unit_price'] < 0)}")
     print(f"  Transactions: {len(phase1_transactions)}")
     print(f"    - Negative quantities: {sum(1 for t in phase1_transactions if t['quantity'] < 0)}")
-    print(f"    - Invalid discounts: {sum(1 for t in phase1_transactions if t['discount_percent'] > 100)}")
-    
+    print(
+        f"    - Invalid discounts: {sum(1 for t in phase1_transactions if t['discount_percent'] > 100)}"
+    )
+
     # Analyze Phase 2 (corrected) data
-    phase2_customers = [c for c in customers if c['scope_date'] == date(2025, 2, 1)]
-    phase2_products = [p for p in products if p['scope_date'] == date(2025, 2, 1)]
-    phase2_transactions = [t for t in transactions if t['scope_date'] == date(2025, 2, 1)]
-    
-    print(f"\nPhase 2 (2025-02-01) - CORRECTED DATA:")
+    phase2_customers = [c for c in customers if c["scope_date"] == date(2025, 2, 1)]
+    phase2_products = [p for p in products if p["scope_date"] == date(2025, 2, 1)]
+    phase2_transactions = [t for t in transactions if t["scope_date"] == date(2025, 2, 1)]
+
+    print("\nPhase 2 (2025-02-01) - CORRECTED DATA:")
     print(f"  Customers: {len(phase2_customers)}")
     print(f"    - Missing emails: {sum(1 for c in phase2_customers if c['email'] is None)}")
     print(f"    - Missing phones: {sum(1 for c in phase2_customers if c['phone'] is None)}")
@@ -653,8 +674,12 @@ if __name__ == "__main__":
     print(f"    - Negative prices: {sum(1 for p in phase2_products if p['unit_price'] < 0)}")
     print(f"  Transactions: {len(phase2_transactions)}")
     print(f"    - Negative quantities: {sum(1 for t in phase2_transactions if t['quantity'] < 0)}")
-    print(f"    - Invalid discounts: {sum(1 for t in phase2_transactions if t['discount_percent'] > 100)}")
-    
-    print(f"\n" + "="*70)
-    print(f"TOTAL: {len(customers)} customers, {len(products)} products, {len(transactions)} transactions")
-    print("="*70)
+    print(
+        f"    - Invalid discounts: {sum(1 for t in phase2_transactions if t['discount_percent'] > 100)}"
+    )
+
+    print("\n" + "=" * 70)
+    print(
+        f"TOTAL: {len(customers)} customers, {len(products)} products, {len(transactions)} transactions"
+    )
+    print("=" * 70)

@@ -25,7 +25,7 @@ def execute_select_query(
 
     This tool executes only SELECT queries (read-only) for safety.
     All queries are logged to the query_history table for audit purposes.
-    
+
     For queries returning many rows, this tool will automatically:
     1. Count total rows before execution
     2. If rows > DEFAULT_ROW_LIMIT, pause and ask user for confirmation
@@ -117,16 +117,16 @@ def execute_select_query(
 
     # Check if query is an aggregation (no row limit needed)
     is_aggregation = _is_aggregation_query(query_text)
-    
+
     # Determine if we need to apply row limiting
     apply_limit = not is_aggregation and DEFAULT_ROW_LIMIT > 0
-    
+
     # If tool_context provided and we should apply limits, check row count first
     if tool_context and apply_limit and requested_limit is None:
         # Count total rows to determine if we need confirmation
         try:
             row_count = _count_query_rows(query_text)
-            
+
             if row_count > DEFAULT_ROW_LIMIT:
                 # Pause and ask user for confirmation
                 confirmation_msg = (
@@ -137,7 +137,7 @@ def execute_select_query(
                     f"• Type a number (e.g., '50') for a specific limit\n"
                     f"• Type 'no' or press Enter to keep the default ({DEFAULT_ROW_LIMIT} rows)"
                 )
-                
+
                 tool_context.request_confirmation(
                     confirmation_msg,
                     confirmation_data={
@@ -147,7 +147,7 @@ def execute_select_query(
                         "default_limit": DEFAULT_ROW_LIMIT,
                     },
                 )
-                
+
                 # Execution will resume when user responds
                 return {
                     "status": "pending_confirmation",
@@ -159,7 +159,7 @@ def execute_select_query(
         except Exception as e:
             # If count fails, continue without confirmation
             print(f"Warning: Could not count rows: {e}")
-    
+
     # Determine the final limit to apply
     final_limit = None
     if apply_limit:
@@ -169,7 +169,7 @@ def execute_select_query(
         else:
             # Apply default limit
             final_limit = DEFAULT_ROW_LIMIT
-    
+
     # Add LIMIT clause if needed
     final_query = query_text
     if final_limit and not _has_limit_clause(query_text):
@@ -390,75 +390,75 @@ def get_query_history(session_id: str | None = None, limit: int = 10) -> dict:
 def _is_aggregation_query(query_text: str) -> bool:
     """
     Check if a query is an aggregation query (no row limit needed).
-    
+
     Aggregation indicators:
     - GROUP BY clause
     - Aggregate functions: COUNT, SUM, AVG, MAX, MIN, etc.
-    
+
     Args:
         query_text: SQL query to analyze
-    
+
     Returns:
         bool: True if query is an aggregation
     """
     query_upper = query_text.upper()
-    
+
     # Check for GROUP BY
-    if re.search(r'\bGROUP\s+BY\b', query_upper):
+    if re.search(r"\bGROUP\s+BY\b", query_upper):
         return True
-    
+
     # Check for aggregate functions
     agg_functions = [
-        r'\bCOUNT\s*\(',
-        r'\bSUM\s*\(',
-        r'\bAVG\s*\(',
-        r'\bMAX\s*\(',
-        r'\bMIN\s*\(',
-        r'\bSTDDEV\s*\(',
-        r'\bVARIANCE\s*\(',
+        r"\bCOUNT\s*\(",
+        r"\bSUM\s*\(",
+        r"\bAVG\s*\(",
+        r"\bMAX\s*\(",
+        r"\bMIN\s*\(",
+        r"\bSTDDEV\s*\(",
+        r"\bVARIANCE\s*\(",
     ]
-    
+
     for pattern in agg_functions:
         if re.search(pattern, query_upper):
             return True
-    
+
     return False
 
 
 def _has_limit_clause(query_text: str) -> bool:
     """
     Check if query already has a LIMIT clause.
-    
+
     Args:
         query_text: SQL query to check
-    
+
     Returns:
         bool: True if LIMIT clause exists
     """
-    return bool(re.search(r'\bLIMIT\s+\d+', query_text, re.IGNORECASE))
+    return bool(re.search(r"\bLIMIT\s+\d+", query_text, re.IGNORECASE))
 
 
 def _count_query_rows(query_text: str) -> int:
     """
     Count total rows that would be returned by a query.
-    
+
     Wraps the query in SELECT COUNT(*) FROM (query) to get row count.
-    
+
     Args:
         query_text: SQL query to count rows for
-    
+
     Returns:
         int: Total number of rows
-    
+
     Raises:
         Exception: If count query fails
     """
     # Remove any trailing semicolon
-    clean_query = query_text.rstrip().rstrip(';')
-    
+    clean_query = query_text.rstrip().rstrip(";")
+
     # Wrap in count query
     count_query = f"SELECT COUNT(*) as row_count FROM ({clean_query}) AS subquery"
-    
+
     with get_db_connection() as conn:
         result = conn.execute(count_query).fetchone()
         return result[0] if result else 0

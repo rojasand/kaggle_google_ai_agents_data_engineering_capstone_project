@@ -27,10 +27,7 @@ def check_for_approval(events):
     for event in events:
         if event.content and event.content.parts:
             for part in event.content.parts:
-                if (
-                    part.function_call
-                    and part.function_call.name == "adk_request_confirmation"
-                ):
+                if part.function_call and part.function_call.name == "adk_request_confirmation":
                     # Extract hint from function call arguments
                     hint = None
                     if hasattr(part.function_call, "args") and part.function_call.args:
@@ -72,9 +69,7 @@ def create_approval_response(approval_info, confirmed):
         name="adk_request_confirmation",
         response={"confirmed": confirmed},
     )
-    return types.Content(
-        role="user", parts=[types.Part(function_response=confirmation_response)]
-    )
+    return types.Content(role="user", parts=[types.Part(function_response=confirmation_response)])
 
 
 def parse_user_confirmation(user_input: str) -> bool:
@@ -200,7 +195,7 @@ async def run_sql_workflow(
 
         # STEP 4: Resume with user's confirmation
         approval_response = create_approval_response(approval_info, user_confirmed)
-        
+
         async for event in runner.run_async(
             user_id=user_id,
             session_id=session_id,

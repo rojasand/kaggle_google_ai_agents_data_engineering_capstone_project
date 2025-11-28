@@ -1,8 +1,8 @@
 """Data exploration agent for database interaction."""
 
 from google.adk.agents import Agent
-from google.adk.tools import preload_memory
 from google.adk.models.google_llm import Gemini
+from google.adk.tools import preload_memory
 from google.genai import types
 
 from src.config import settings
@@ -99,7 +99,7 @@ retry_config = types.HttpRetryOptions(
     http_status_codes=[429, 500, 503, 504],  # Retry on these HTTP errors
 )
 
-# Create the data exploration agent
+# Create the data exploration agent with observability
 root_agent = Agent(
     name="data_explorer",
     model=Gemini(

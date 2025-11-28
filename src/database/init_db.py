@@ -254,10 +254,10 @@ def verify_data(conn) -> None:
 
     # Verify quality issues by phase
     logger.info("\nVerifying intentional quality issues by phase:")
-    
+
     # Phase 1 (2025-01-01) - Faulty data
     logger.info("\n  Phase 1 (2025-01-01) - FAULTY DATA:")
-    
+
     phase1_customers = conn.execute(
         "SELECT COUNT(*) FROM customers WHERE scope_date = '2025-01-01'"
     ).fetchone()[0]
@@ -265,7 +265,7 @@ def verify_data(conn) -> None:
         "SELECT COUNT(*) FROM customers WHERE email IS NULL AND scope_date = '2025-01-01'"
     ).fetchone()[0]
     logger.info(f"    ✓ Customers: {phase1_customers}, Missing emails: {missing_emails_p1}")
-    
+
     phase1_products = conn.execute(
         "SELECT COUNT(*) FROM products WHERE scope_date = '2025-01-01'"
     ).fetchone()[0]
@@ -273,7 +273,7 @@ def verify_data(conn) -> None:
         "SELECT COUNT(*) FROM products WHERE product_name IS NULL AND scope_date = '2025-01-01'"
     ).fetchone()[0]
     logger.info(f"    ✓ Products: {phase1_products}, Missing names: {missing_names_p1}")
-    
+
     phase1_transactions = conn.execute(
         "SELECT COUNT(*) FROM sales_transactions WHERE scope_date = '2025-01-01'"
     ).fetchone()[0]
@@ -284,27 +284,33 @@ def verify_data(conn) -> None:
         AND t.customer_id NOT IN (SELECT customer_id FROM customers)
     """
     ).fetchone()[0]
-    logger.info(f"    ✓ Transactions: {phase1_transactions}, Orphaned customers: {orphaned_customers_p1}")
-    
+    logger.info(
+        f"    ✓ Transactions: {phase1_transactions}, Orphaned customers: {orphaned_customers_p1}"
+    )
+
     # Phase 2 (2025-02-01) - Corrected data
     logger.info("\n  Phase 2 (2025-02-01) - CORRECTED DATA:")
-    
+
     phase2_customers = conn.execute(
         "SELECT COUNT(*) FROM customers WHERE scope_date = '2025-02-01'"
     ).fetchone()[0]
     missing_emails_p2 = conn.execute(
         "SELECT COUNT(*) FROM customers WHERE email IS NULL AND scope_date = '2025-02-01'"
     ).fetchone()[0]
-    logger.info(f"    ✓ Customers: {phase2_customers}, Missing emails: {missing_emails_p2} (should be 0)")
-    
+    logger.info(
+        f"    ✓ Customers: {phase2_customers}, Missing emails: {missing_emails_p2} (should be 0)"
+    )
+
     phase2_products = conn.execute(
         "SELECT COUNT(*) FROM products WHERE scope_date = '2025-02-01'"
     ).fetchone()[0]
     missing_names_p2 = conn.execute(
         "SELECT COUNT(*) FROM products WHERE product_name IS NULL AND scope_date = '2025-02-01'"
     ).fetchone()[0]
-    logger.info(f"    ✓ Products: {phase2_products}, Missing names: {missing_names_p2} (should be 0)")
-    
+    logger.info(
+        f"    ✓ Products: {phase2_products}, Missing names: {missing_names_p2} (should be 0)"
+    )
+
     phase2_transactions = conn.execute(
         "SELECT COUNT(*) FROM sales_transactions WHERE scope_date = '2025-02-01'"
     ).fetchone()[0]
@@ -315,7 +321,9 @@ def verify_data(conn) -> None:
         AND t.customer_id NOT IN (SELECT customer_id FROM customers)
     """
     ).fetchone()[0]
-    logger.info(f"    ✓ Transactions: {phase2_transactions}, Orphaned customers: {orphaned_customers_p2} (should be 0)")
+    logger.info(
+        f"    ✓ Transactions: {phase2_transactions}, Orphaned customers: {orphaned_customers_p2} (should be 0)"
+    )
 
 
 def initialize_database() -> None:

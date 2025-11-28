@@ -20,17 +20,22 @@ help:
 	@echo "  make verify-data    - Verify data generation implementation"
 	@echo ""
 	@echo "Running the Agent:"
-	@echo "  make run-adk-web    - Launch ADK Web UI (http://127.0.0.1:8000)"
-	@echo "  make run-adk-api    - Launch ADK API Server (http://127.0.0.1:8000)"
-	@echo "  make test-agent     - Test agent with InMemoryRunner (no server needed)"
+	@echo "  make run-adk-web        - Launch ADK Web UI (http://127.0.0.1:8000)"
+	@echo "  make run-adk-web-debug  - Launch ADK Web UI with DEBUG logging (observability)"
+	@echo "  make run-adk-api        - Launch ADK API Server (http://127.0.0.1:8000)"
+	@echo "  make test-agent         - Test agent with InMemoryRunner (no server needed)"
 	@echo ""
 	@echo "Agent2Agent (A2A) Workflow:"
-	@echo "  make start-data-source  - Start Data Source Agent A2A Server (port 8001)"
-	@echo "  make run-ingestion      - Run Ingestion Agent (interactive mode)"
+	@echo "  make start-data-source      - Start Data Source Agent A2A Server (port 8001)"
+	@echo "  make start-data-source-obs  - Start Data Source Agent with Observability"
+	@echo "  make run-ingestion          - Run Ingestion Agent (interactive mode)"
 	@echo ""
 	@echo "Memory & Sessions:"
-	@echo "  make test-memory    - Run comprehensive memory test suite"
-	@echo "  make clean-sessions - Remove session database (reset conversations)"
+	@echo "  make test-memory        - Run comprehensive memory test suite"
+	@echo "  make clean-sessions     - Remove session database (reset conversations)"
+	@echo ""
+	@echo "Observability & Monitoring:"
+	@echo "  make test-observability - Test observability features with metrics tracking"
 	@echo ""
 	@echo "Development Tools:"
 	@echo "  make launch-jupyter - Start Jupyter Notebook"
@@ -100,6 +105,24 @@ run-adk-web:
 	@echo ""
 	$(POETRY) run adk web $(AGENTS_DIR) --port 8000 --session_service_uri sqlite:///database/agent_sessions.db
 
+# Launch ADK Web interface with DEBUG logging for observability
+run-adk-web-debug:
+	@if [ ! -d $(VENV) ]; then \
+		echo "Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "Starting ADK Web UI with DEBUG logging enabled..."
+	@echo "🚀 Data Engineer Agent will be available at: http://127.0.0.1:8000"
+	@echo "💾 Sessions stored in: database/agent_sessions.db"
+	@echo "📊 DEBUG logs will show detailed agent activity and observability data"
+	@echo "   - Full LLM prompts and responses"
+	@echo "   - Tool execution details"
+	@echo "   - Performance metrics"
+	@echo "   - Internal state transitions"
+	@echo "Press Ctrl+C to stop the server"
+	@echo ""
+	$(POETRY) run adk web $(AGENTS_DIR) --port 8000 --session_service_uri sqlite:///database/agent_sessions.db --log_level DEBUG
+
 # Launch ADK API Server
 run-adk-api:
 	@if [ ! -d $(VENV) ]; then \
@@ -167,6 +190,15 @@ start-data-source:
 	@echo "Starting Data Source Agent A2A Server..."
 	$(POETRY) run python -m src.agents.data_source_agent.server
 
+# Start Data Source Agent with Observability
+start-data-source-obs:
+	@if [ ! -d $(VENV) ]; then \
+		echo "Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "Starting Data Source Agent A2A Server with Observability..."
+	$(POETRY) run python -m src.agents.data_source_agent.server_with_observability
+
 # Run Ingestion Agent (interactive mode)
 run-ingestion:
 	@if [ ! -d $(VENV) ]; then \
@@ -208,6 +240,16 @@ test-memory:
 	@echo "Running memory test suite..."
 	@echo ""
 	$(POETRY) run python examples/test_memory.py
+
+# Test observability features
+test-observability:
+	@if [ ! -d $(VENV) ]; then \
+		echo "Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "🧪 Testing observability features..."
+	@echo ""
+	$(POETRY) run python -m src.tests.test_observability
 
 # Remove session database (reset conversations)
 clean-sessions:

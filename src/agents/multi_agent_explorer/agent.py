@@ -386,7 +386,7 @@ For quality metrics, explain scores in plain language and highlight issues that 
 )
 
 # ============================================================================
-# ROOT AGENT: Sequential Pipeline
+# ROOT AGENT: Sequential Pipeline with Observability
 # ============================================================================
 # Chains all three agents together in guaranteed order
 

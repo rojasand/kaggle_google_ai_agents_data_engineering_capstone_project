@@ -47,9 +47,7 @@ def load_and_upsert_csv(file_path: str, table_name: str) -> dict:
         if table_name not in valid_tables:
             return {
                 "status": "error",
-                "error_message": (
-                    f"Invalid table name. Valid options: {', '.join(valid_tables)}"
-                ),
+                "error_message": (f"Invalid table name. Valid options: {', '.join(valid_tables)}"),
                 "message": "Failed to load data",
             }
 
@@ -109,10 +107,12 @@ def _upsert_customers(df: pl.DataFrame) -> dict:
             try:
                 Customer(**row_dict)
             except ValidationError as e:
-                validation_errors.append({
-                    "customer_id": row_dict.get("customer_id"),
-                    "errors": str(e),
-                })
+                validation_errors.append(
+                    {
+                        "customer_id": row_dict.get("customer_id"),
+                        "errors": str(e),
+                    }
+                )
                 continue
 
             # Check if record exists
@@ -216,10 +216,12 @@ def _upsert_products(df: pl.DataFrame) -> dict:
             try:
                 Product(**row_dict)
             except ValidationError as e:
-                validation_errors.append({
-                    "product_id": row_dict.get("product_id"),
-                    "errors": str(e),
-                })
+                validation_errors.append(
+                    {
+                        "product_id": row_dict.get("product_id"),
+                        "errors": str(e),
+                    }
+                )
                 continue
 
             # Check if record exists
@@ -326,10 +328,12 @@ def _upsert_sales_transactions(df: pl.DataFrame) -> dict:
             try:
                 SalesTransaction(**row_dict)
             except ValidationError as e:
-                validation_errors.append({
-                    "transaction_id": row_dict.get("transaction_id"),
-                    "errors": str(e),
-                })
+                validation_errors.append(
+                    {
+                        "transaction_id": row_dict.get("transaction_id"),
+                        "errors": str(e),
+                    }
+                )
                 continue
 
             # Check if record exists

@@ -270,7 +270,7 @@ sales_transactions, data_quality_metrics.
 Always maintain this structure and be helpful in your summaries.""",
 )
 
-# Root agent: Sequential pipeline
+# Root agent: Sequential pipeline with Observability
 # Chains the three agents: Generator → Executor → Formatter
 root_agent = SequentialAgent(
     name="SQLAgent",

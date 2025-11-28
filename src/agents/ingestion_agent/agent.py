@@ -2,8 +2,8 @@
 
 from google.adk.agents import Agent
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent
-from google.adk.tools import preload_memory
 from google.adk.models.google_llm import Gemini
+from google.adk.tools import preload_memory
 from google.genai import types
 
 from src.config import settings
@@ -21,7 +21,7 @@ retry_config = types.HttpRetryOptions(
 data_source_agent = RemoteA2aAgent(
     name="data_source_agent",
     description="Remote data source agent from mock vendor that provides perfect-quality CSV data.",
-    agent_card="http://localhost:8001/.well-known/agent-card.json"
+    agent_card="http://localhost:8001/.well-known/agent-card.json",
 )
 
 AGENT_INSTRUCTIONS = """

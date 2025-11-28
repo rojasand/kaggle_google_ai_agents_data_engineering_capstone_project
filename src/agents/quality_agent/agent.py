@@ -325,7 +325,7 @@ IMPORTANT: Format as markdown with clear sections, tables optional.""",
 )
 
 # ============================================================================
-# Root Agent: Sequential Pipeline
+# Root Agent: Sequential Pipeline with Observability
 # ============================================================================
 
 root_agent = SequentialAgent(
