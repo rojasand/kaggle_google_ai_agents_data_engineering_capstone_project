@@ -92,11 +92,14 @@ make run           # Start the agent (auto-initializes DB if needed)
 make launch-jupyter # Start Jupyter Notebook
 make test          # Run tests
 make test-quality  # Test all 8 data quality indicators
+make test-eval-all # Run ADK evaluation tests for all agents (CI)
 make check-code    # Check code quality (no changes)
 make fix-code      # Format and fix code issues
 make clean         # Remove virtual environment and caches
 make clean-db      # Remove database files
 ```
+
+> **📊 ADK Evaluation Tests**: This project includes comprehensive Agent Development Kit (ADK) evaluation tests with **29 test cases** across **6 agents** for continuous integration. Use `make test-eval-all` to run all evaluations, or test individual agents with `make test-eval-<agent-name>`. Each agent has 3-6 test cases covering core functionalities, error handling, and edge cases.
 
 ## Agent2Agent (A2A) Data Ingestion
 

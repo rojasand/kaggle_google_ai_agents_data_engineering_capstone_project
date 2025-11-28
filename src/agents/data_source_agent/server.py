@@ -3,7 +3,7 @@
 import uvicorn
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
 
-from src.agents.data_source_agent import root_agent
+from src.agents.data_source_agent.agent import root_agent
 
 # Convert agent to A2A-compatible FastAPI app
 app = to_a2a(

@@ -1,0 +1,133 @@
+{
+  "eval_set_id": "data_source_agent_core_functionality",
+  "eval_cases": [
+    {
+      "eval_id": "generate_customer_data",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "Generate customer data for 2025-01-15"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "generate_perfect_data",
+                "args": {
+                  "table_name": "customers",
+                  "logic_date": "2025-01-15"
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "I've successfully generated 500 rows of perfect-quality customer data. The file is available at: data_to_ingest/customers_2025-01-15.csv"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "generate_product_data",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "I need product data for logic date 2025-02-01"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "generate_perfect_data",
+                "args": {
+                  "table_name": "products",
+                  "logic_date": "2025-02-01"
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "I've successfully generated 200 rows of perfect-quality product data. The file is available at: data_to_ingest/products_2025-02-01.csv"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "invalid_table_error",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "Generate data for the employees table on 2025-01-01"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "generate_perfect_data",
+                "args": {
+                  "table_name": "employees",
+                  "logic_date": "2025-01-01"
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "I can only generate data for these tables: customers, products, and sales_transactions. The 'employees' table is not supported. Please choose one of the available tables."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "generate_sales_transactions",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "Create sales_transactions data for March 1st, 2025"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "generate_perfect_data",
+                "args": {
+                  "table_name": "sales_transactions",
+                  "logic_date": "2025-03-01"
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "I've successfully generated 2000 rows of perfect-quality sales transaction data. The file is available at: data_to_ingest/sales_transactions_2025-03-01.csv"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

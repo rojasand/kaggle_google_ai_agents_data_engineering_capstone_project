@@ -1,0 +1,141 @@
+{
+  "name": "Basic Smoke Test Set",
+  "description": "Verification of core functionalities for CI - Ingestion Agent",
+  "eval_cases": [
+    {
+      "name": "ingest_customer_data_happy_path",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "Please ingest customer data for 2025-01-15"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "record_pipeline_run",
+                "args": {
+                  "pipeline_name": "customer_ingestion",
+                  "logic_date": "2025-01-15",
+                  "status": "success"
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "Successfully ingested customer data for 2025-01-15. The data has been validated and loaded into the database."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "request_vendor_data_via_a2a",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "Fetch product data from the vendor for 2025-02-01"
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "I've requested product data for 2025-02-01 from the vendor via Agent-to-Agent communication. The data will be validated and loaded once received."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "validation_error_handling",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "Load a CSV file with invalid schema"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "load_and_upsert_csv",
+                "args": {
+                  "file_path": "/path/to/invalid.csv",
+                  "table_name": "customers"
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "Data validation failed. The CSV file does not match the expected schema for the customers table. Please ensure all required columns are present with correct data types."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "multi_turn_ingestion_workflow",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "I need to load sales data for January 2025"
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "I'll help you load sales data for January 2025. First, I need to request the data from the vendor."
+              }
+            ]
+          }
+        },
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "Proceed with the ingestion"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "record_pipeline_run",
+                "args": {
+                  "pipeline_name": "sales_transactions_ingestion",
+                  "logic_date": "2025-01-01",
+                  "status": "success"
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "Sales data for January 2025 has been successfully validated and loaded. Pipeline run recorded."
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

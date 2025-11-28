@@ -1,0 +1,177 @@
+{
+  "eval_set_id": "multi_agent_explorer_core_functionality",
+  "description": "Verification of core functionalities for CI - Multi-Agent Data Explorer Pipeline",
+  "eval_cases": [
+    {
+      "eval_id": "tool_selection_exploration",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "What tables are in the database?"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "list_tables",
+                "args": {}
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "The database contains four main tables:\n\n1. **Customers** - Stores customer information including names, contact details, and segments\n2. **Products** - Contains product catalog with pricing and inventory data\n3. **Sales Transactions** - Records all sales activity with amounts and dates\n4. **Data Quality Metrics** - Tracks quality measurements across tables\n\nThese tables work together to support business analytics and reporting. Would you like to explore any specific table in more detail?"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "tool_selection_quality_metrics",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "Check the data quality for customers table"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "calculate_quality_metrics",
+                "args": {
+                  "table_name": "customers",
+                  "logic_date": null
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "**Customer Data Quality Report**\n\nI've analyzed the customer data quality and here's what I found:\n\n**Completeness:** The customer records show excellent coverage. Email addresses are present for 98% of customers, and phone numbers for 95%. This high level of completeness ensures we can reach most customers.\n\n**Consistency:** All registration dates are properly formatted and fall within expected ranges, showing consistent data entry practices.\n\n**Uniqueness:** Customer IDs are 100% unique with no duplicates, ensuring data integrity.\n\n**Overall Assessment:** The customer data is in excellent shape with no critical quality issues. The data is ready for business use and analytics."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "out_of_scope_request",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "Can you send an email to customers?"
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "I'm a data exploration and quality analysis assistant. I can help you with:\n\n• **Exploring database tables** - List tables, show schemas, view sample data\n• **Quality analysis** - Calculate data quality metrics, check completeness and consistency\n\nHowever, I cannot send emails or perform actions outside of data analysis. For email functionality, you would need to use a different system or tool.\n\nIs there something related to exploring customer data or checking its quality that I can help you with?"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "multi_turn_mixed_tools",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "Show me the products table structure"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "describe_table",
+                "args": {
+                  "table_name": "products"
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "The **products** table has the following structure:\n\n**Columns:**\n- product_id (INTEGER) - Unique identifier\n- product_name (VARCHAR) - Name of the product\n- category, subcategory (VARCHAR) - Product classification\n- unit_price, cost_price (DECIMAL) - Pricing information\n- supplier_id (INTEGER) - Supplier reference\n- stock_quantity, reorder_level (INTEGER) - Inventory levels\n- scope_date (DATE) - Data snapshot date\n\nThis table contains product catalog information with pricing and inventory management data."
+              }
+            ]
+          }
+        },
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "What's the quality of this table's data?"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "get_quality_metrics_by_table",
+                "args": {
+                  "table_name": "products",
+                  "scope_date": null
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "**Product Data Quality Analysis**\n\nThe product data shows strong quality metrics:\n\n**Completeness:** Product names are 100% complete - every product has a name. This is critical for catalog operations.\n\n**Validity:** Unit prices are all positive values, and stock quantities fall within acceptable ranges. No invalid data detected.\n\n**Overall:** The product catalog maintains high data quality standards with no issues that would impact business operations. The data is reliable for inventory management and pricing decisions."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "intelligent_tool_routing",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "Give me comprehensive information about the sales_transactions table"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "get_table_info",
+                "args": {
+                  "table_name": "sales_transactions"
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "**Sales Transactions Table - Comprehensive Overview**\n\n**Purpose:** This table is the heart of our sales data, recording every transaction that occurs. It connects customers with products and captures the complete transaction context.\n\n**Structure:**\n- **Identifiers:** transaction_id (unique), customer_id, product_id\n- **Transaction Details:** transaction_date, quantity, unit_price, discount_percent, total_amount\n- **Context:** payment_method, sales_channel, region\n- **Metadata:** scope_date\n\n**Business Value:** This table enables revenue analysis, customer behavior tracking, regional performance monitoring, and sales channel effectiveness measurement.\n\n**Sample Data Preview:** The table includes diverse transactions across multiple regions, payment methods, and sales channels, providing rich data for analytics.\n\n**Quality Considerations:** This is a high-volume table with strict data quality requirements. Regular monitoring ensures accuracy of financial calculations and referential integrity with customer and product tables."
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

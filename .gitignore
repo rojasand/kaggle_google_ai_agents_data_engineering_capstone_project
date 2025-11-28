@@ -232,3 +232,6 @@ ai_plan/
 
 # TODO
 TODO.txt
+
+# ADK evalset json files
+*evalset_result.json
