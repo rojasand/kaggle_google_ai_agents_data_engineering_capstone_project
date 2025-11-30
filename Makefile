@@ -70,8 +70,8 @@ install:
 	$(POETRY) install
 	@echo "Dependencies installed!"
 
-# Complete setup: install + create .env
-setup: install
+# Complete setup: install + create .env + initialize database
+setup: install init-db
 	@if [ ! -f .env ]; then \
 		echo "Creating .env file from .env.example..."; \
 		cp .env.example .env; \
