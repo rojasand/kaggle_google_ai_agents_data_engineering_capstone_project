@@ -1,6 +1,37 @@
 # 🤖 Data Robot Agent: Enterprise AI for Data Engineering
 
+**⚡ Jump directly to execution → [Quick Start (5 Minutes)](#quick-start-5-minutes)**
+
 An AI-powered multi-agent system that demonstrates advanced agent orchestration patterns for data quality analysis, intelligent query routing, and enterprise data management. Built for the [Kaggle 5-Day AI Agents Intensive Course](https://www.kaggle.com/learn-guide/5-day-agents) Capstone Project (Enterprise Agents Track).
+
+## 📑 Table of Contents
+
+- [Problem → Solution → Value](#problem--solution--value)
+- [Quick Architecture Overview](#quick-architecture-overview)
+- [Tech Stack](#tech-stack)
+- [✅ Course Concepts Demonstrated](#-course-concepts-demonstrated-rubric-alignment)
+  - [Concept 1: Multi-Agent System](#-concept-1-multi-agent-system-15-points)
+  - [Concept 2: Custom Tools](#-concept-2-custom-tools-15-points)
+  - [Concept 3: Sessions & Memory](#-concept-3-sessions--memory-5-10-points-optional)
+  - [Concept 4: Agent2Agent Communication](#-concept-4-agent2agent-communication-10-points-optional)
+  - [Concept 5: Observability & Metrics](#-concept-5-observability--metrics-5-10-points-optional)
+- [Quick Start (5 Minutes)](#quick-start-5-minutes)
+- [Makefile Commands (Complete Reference)](#makefile-commands-complete-reference)
+- [Project Structure (For Judges)](#project-structure-for-judges)
+- [The Agents](#the-agents)
+- [Key Design Decisions](#key-design-decisions-why-this-architecture)
+- [Example Interactions](#example-interactions)
+- [✅ Rubric Verification Checklist](#-rubric-verification-checklist-for-judges)
+- [Troubleshooting (For Judge Evaluation)](#troubleshooting-for-judge-evaluation)
+- [Features](#features)
+- [Sample Data](#sample-data)
+- [Memory & Session Management](#memory--session-management)
+- [Agent2Agent (A2A) Data Ingestion](#agent2agent-a2a-data-ingestion)
+- [Development](#development)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
+
+---
 
 ## Problem → Solution → Value
 
@@ -148,20 +179,72 @@ nano .env
 GEMINI_API_KEY=your_actual_key_here
 ```
 
-### 4. Run the Agent
+### 4. Run the Agent (Choose One Option)
+
+#### Option A: Run Data Robot Agent (Main Agent with Parallel + Sequential Routing)
 
 ```bash
-make run
+make run-data-robot-web
 ```
 
 **Expected Output**:
+```
+Starting Data Robot Agent Web UI...
+🚀 Data Robot Agent will be available at: http://127.0.0.1:8000
+💾 Sessions stored in: database/agent_sessions.db
+🤖 Features:
+   - Parallel capability checking (SQL, Quality, Exploration, Ingestion)
+   - Sequential request routing (Parser → Executor → Formatter)
+   - Four specialized agent delegation
+Press Ctrl+C to stop the server
+```
 
+**Open in browser**: http://127.0.0.1:8000
+
+---
+
+#### Option B: Run with Data Source Agent (For A2A Demo)
+
+**Terminal 1**: Start Data Source Agent (Mock vendor)
+```bash
+make start-data-source
 ```
-Starting Data Robot Agent server...
-📍 Server available at: http://localhost:8002/agent
-✅ Database initialized: 1,025 customers, 200 products, 10,000 transactions
-Ready to accept requests!
+
+**Terminal 2**: Start Ingestion Agent (Data consumer)
+```bash
+make run-ingestion
 ```
+
+**Expected Output**:
+```
+Running Ingestion Agent (interactive mode)...
+Make sure Data Source Agent is running on port 8001!
+🚀 Ingestion Agent available at: http://127.0.0.1:8002
+```
+
+**Open in browser**: http://127.0.0.1:8002
+
+Try asking: "Re-ingest customers for 2025-11-24"
+
+---
+
+#### Option C: Run with ADK Web UI (All Agents)
+
+```bash
+make run-adk-web
+```
+
+**Expected Output**:
+```
+Starting ADK Web UI with persistent sessions...
+🚀 Data Engineer Agent will be available at: http://127.0.0.1:8000
+💾 Sessions stored in: database/agent_sessions.db
+Press Ctrl+C to stop the server
+```
+
+**Open in browser**: http://127.0.0.1:8000
+
+---
 
 ### 5. ✅ Verify Everything Works (Run Tests)
 
@@ -187,20 +270,39 @@ Total: 5 tests | Passed: 5 | Failed: 0
 
 ## Makefile Commands (Complete Reference)
 
-| Command                           | Purpose                                                     |
-| --------------------------------- | ----------------------------------------------------------- |
-| `make setup`                    | **One-command setup**: install + database + .env file |
-| `make run`                      | Start agent server on port 8002                             |
-| `make test-data-robot`          | Run 5 core tests (verify everything works) ✅               |
-| `make clean-db && make init-db` | Reset database to clean state                               |
-| `make start-data-source`        | Start A2A Data Source Agent on port 8001                    |
-| `make run-ingestion`            | Start Ingestion Agent web UI on port 8002                   |
-| `make test-eval-all`            | Run 29 ADK evaluation tests across 6 agents                 |
-| `make test-quality`             | Test 8 quality indicators                                   |
-| `make check-code`               | Check code quality without making changes                   |
-| `make fix-code`                 | Auto-format and fix linting issues                          |
-| `make clean`                    | Remove venv and all caches                                  |
-| `make help`                     | Show all available commands                                 |
+### ⚡ Setup & Initialization
+| Command | Purpose |
+| --- | --- |
+| `make setup` | **ONE-COMMAND SETUP**: install dependencies + init database + create .env |
+| `make install` | Install dependencies only (Poetry) |
+| `make init-db` | Initialize/reinitialize database with sample data |
+| `make clean-db` | Delete database files (reset to clean state) |
+| `make clean` | Remove venv and all cache files |
+
+### 🚀 Running the Agent (Choose One)
+| Command | Purpose | Port |
+| --- | --- | --- |
+| `make run-data-robot-web` | **START HERE**: Data Robot Agent with web UI (Parallel + Sequential routing) | 8000 |
+| `make run-adk-web` | ADK Web UI with all 6 agents (with persistent sessions) | 8000 |
+| `make start-data-source` | Start A2A Data Source Agent (mock vendor) | 8001 |
+| `make run-ingestion` | Start Ingestion Agent (A2A consumer) | 8002 |
+
+### ✅ Testing & Verification
+| Command | Purpose |
+| --- | --- |
+| `make test-data-robot` | Run 5 core tests (verify everything works) ✅ |
+| `make test-eval-all` | Run 29 ADK evaluation tests across 6 agents |
+| `make test-quality` | Test 8 quality indicators |
+| `make test-memory` | Run comprehensive memory/session tests |
+
+### 🛠️ Development
+| Command | Purpose |
+| --- | --- |
+| `make check-code` | Check code quality (Ruff) - no changes made |
+| `make fix-code` | Auto-format and fix linting issues |
+| `make type-check` | Run mypy type checker |
+| `make launch-jupyter` | Start Jupyter Notebook server |
+| `make help` | Show all available commands |
 
 ---
 
