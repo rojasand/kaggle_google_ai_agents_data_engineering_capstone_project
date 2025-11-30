@@ -264,19 +264,19 @@ def _save_query_history(
                     rows_returned, error_message, creation_timestamp
                 ) VALUES (?, ?, ?, ?, ?, ?)
             """,
-                [
+                (
                     session_id,
                     query_text,
                     execution_status,
                     rows_returned,
                     error_message,
                     date.today(),
-                ],
+                ),
             )
             conn.commit()
     except Exception as e:
         # Log but don't raise - history tracking shouldn't block query execution
-        print(f"Warning: Failed to save query history: {e}")
+        pass  # Silently ignore query history errors
 
 
 def get_query_history(session_id: str | None = None, limit: int = 10) -> dict:

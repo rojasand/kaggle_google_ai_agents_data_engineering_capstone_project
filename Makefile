@@ -1,4 +1,4 @@
-.PHONY: help install setup launch-jupyter run-adk-web check-code fix-code type-check clean init-db clean-db test-eval-all test-eval-data-agent test-eval-data-source-agent test-eval-ingestion-agent test-eval-quality-agent test-eval-sql-agent test-eval-multi-agent-explorer
+.PHONY: help install setup launch-jupyter run-adk-web check-code fix-code type-check clean init-db clean-db test-eval-all test-eval-data-agent test-eval-data-source-agent test-eval-ingestion-agent test-eval-quality-agent test-eval-sql-agent test-eval-multi-agent-explorer run-data-robot-web test-data-robot test-data-robot-all test-eval-data-robot-agent
 
 # Python version
 PYTHON := python3.11
@@ -47,6 +47,12 @@ help:
 	@echo "  make test-eval-all              - Run evaluations for all agents"
 	@echo "  make test-eval-data-agent       - Evaluate data_agent"
 	@echo "  make test-eval-data-source-agent - Evaluate data_source_agent"
+	@echo ""
+	@echo "Data Robot Agent (Leader Agent):"
+	@echo "  make run-data-robot-web         - Launch Data Robot Agent Web UI (port 8000)"
+	@echo "  make test-data-robot            - Run comprehensive test scenarios"
+	@echo "  make test-data-robot-all        - Run all tests + evaluation"
+	@echo "  make test-eval-data-robot-agent - ADK evaluation of data_robot_agent"
 	@echo ""
 	@echo "Cleanup:"
 	@echo "  make clean          - Remove virtual environment and cache files"
@@ -390,4 +396,66 @@ test-eval-multi-agent-explorer:
 	@echo "🧪 Evaluating multi_agent_explorer..."
 	$(POETRY) run adk eval $(AGENTS_DIR)/multi_agent_explorer $(AGENTS_DIR)/multi_agent_explorer/basic_eval_set.evalset.json \
 		--config_file_path=$(AGENTS_DIR)/multi_agent_explorer/test_config.json \
+		--print_detailed_results
+
+# =============================================================================
+# DATA ROBOT AGENT (Leader Agent with ParallelAgent & SequentialAgent)
+# =============================================================================
+
+# Launch Data Robot Agent Web UI
+run-data-robot-web:
+	@if [ ! -d $(VENV) ]; then \
+		echo "Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "Starting Data Robot Agent Web UI..."
+	@echo "🚀 Data Robot Agent will be available at: http://127.0.0.1:8000"
+	@echo "💾 Sessions stored in: database/agent_sessions.db"
+	@echo "🤖 Features:"
+	@echo "   - Parallel capability checking (SQL, Quality, Exploration, Ingestion)"
+	@echo "   - Sequential request routing (Parser → Executor → Formatter)"
+	@echo "   - Four specialized agent delegation"
+	@echo "Press Ctrl+C to stop the server"
+	@echo ""
+	$(POETRY) run adk web $(AGENTS_DIR)/data_robot_agent --port 8000 --session_service_uri sqlite:///database/agent_sessions.db
+
+# Run comprehensive test scenarios for data_robot_agent
+test-data-robot:
+	@if [ ! -d $(VENV) ]; then \
+		echo "Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "=========================================="
+	@echo "Running Data Robot Agent Test Scenarios"
+	@echo "=========================================="
+	@echo ""
+	@echo "Tests included:"
+	@echo "  1. SQL Execution - Natural language to SQL queries"
+	@echo "  2. Data Quality - Quality metrics and trends"
+	@echo "  3. Data Exploration - Database structure discovery"
+	@echo "  4. Table Description - Schema and business context"
+	@echo "  5. Data Aggregation - GROUP BY and statistics"
+	@echo "  6. Explain Capabilities - Comprehensive capability documentation"
+	@echo "  7. Request Routing - Correct capability routing"
+	@echo ""
+	$(POETRY) run python -m src.tests.test_data_robot_agent
+
+# Run all tests + ADK evaluation for data_robot_agent
+test-data-robot-all: test-data-robot test-eval-data-robot-agent
+	@echo ""
+	@echo "=========================================="
+	@echo "✅ All Data Robot Agent Tests Complete"
+	@echo "=========================================="
+
+# ADK Evaluation for data_robot_agent
+test-eval-data-robot-agent:
+	@if [ ! -d $(VENV) ]; then \
+		echo "Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo ""
+	@echo "🧪 Running ADK Evaluation for data_robot_agent..."
+	@echo ""
+	$(POETRY) run adk eval $(AGENTS_DIR)/data_robot_agent $(AGENTS_DIR)/data_robot_agent/basic_eval_set.evalset.json \
+		--config_file_path=$(AGENTS_DIR)/data_robot_agent/test_config.json \
 		--print_detailed_results

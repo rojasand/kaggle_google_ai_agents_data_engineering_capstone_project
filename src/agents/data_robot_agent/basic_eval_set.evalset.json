@@ -1,0 +1,94 @@
+{
+  "eval_id": "data_robot_agent_core_functionality",
+  "eval_description": "End-to-end evaluation of data_robot_agent's four core capabilities: SQL execution, data quality, data exploration, and request routing",
+  "test_cases": [
+    {
+      "user_content": "What tables exist in the database?",
+      "intermediate_data": {
+        "expected_capability": "exploration",
+        "expected_tools": ["list_tables"]
+      },
+      "final_response": {
+        "should_contain": ["table", "customers", "products", "sales"],
+        "should_not_contain": ["error", "unable", "failed"]
+      }
+    },
+    {
+      "user_content": "Describe the customers table structure",
+      "intermediate_data": {
+        "expected_capability": "exploration",
+        "expected_tools": ["describe_table"]
+      },
+      "final_response": {
+        "should_contain": ["customer_id", "customer_name", "schema", "column"],
+        "should_not_contain": ["error"]
+      }
+    },
+    {
+      "user_content": "Show me the top 5 customers by lifetime value",
+      "intermediate_data": {
+        "expected_capability": "sql",
+        "expected_tools": ["execute_select_query"]
+      },
+      "final_response": {
+        "should_contain": ["customer", "lifetime", "value", "rank", "top"],
+        "should_not_contain": ["error"]
+      }
+    },
+    {
+      "user_content": "How many customers are in each country?",
+      "intermediate_data": {
+        "expected_capability": "sql",
+        "expected_tools": ["execute_select_query"]
+      },
+      "final_response": {
+        "should_contain": ["country", "count", "customer"],
+        "should_not_contain": ["error"]
+      }
+    },
+    {
+      "user_content": "What's the data quality of the customers table?",
+      "intermediate_data": {
+        "expected_capability": "quality",
+        "expected_tools": ["get_quality_metrics_by_table"]
+      },
+      "final_response": {
+        "should_contain": ["quality", "metric", "customer"],
+        "should_not_contain": ["error"]
+      }
+    },
+    {
+      "user_content": "Tell me about the sales_transactions table",
+      "intermediate_data": {
+        "expected_capability": "exploration",
+        "expected_tools": ["get_table_info"]
+      },
+      "final_response": {
+        "should_contain": ["sales", "transaction", "description"],
+        "should_not_contain": ["error"]
+      }
+    },
+    {
+      "user_content": "Count the products by category",
+      "intermediate_data": {
+        "expected_capability": "sql",
+        "expected_tools": ["execute_select_query"]
+      },
+      "final_response": {
+        "should_contain": ["product", "category", "count"],
+        "should_not_contain": ["error"]
+      }
+    },
+    {
+      "user_content": "What's the average order value?",
+      "intermediate_data": {
+        "expected_capability": "sql",
+        "expected_tools": ["execute_select_query"]
+      },
+      "final_response": {
+        "should_contain": ["average", "order", "value"],
+        "should_not_contain": ["error"]
+      }
+    }
+  ]
+}

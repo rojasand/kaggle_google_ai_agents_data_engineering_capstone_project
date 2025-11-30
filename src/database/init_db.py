@@ -106,7 +106,7 @@ def create_tables(conn) -> None:
     # Create query_history table
     conn.execute("""
         CREATE TABLE query_history (
-            query_id INTEGER PRIMARY KEY,
+            query_id INTEGER,
             session_id VARCHAR NOT NULL,
             query_text TEXT NOT NULL,
             execution_status VARCHAR NOT NULL,

@@ -1,0 +1,45 @@
+{
+  "eval_criteria": [
+    {
+      "criterion_id": "response_relevance",
+      "criterion_name": "Response Relevance",
+      "description": "Agent response is relevant to user request and answers the question",
+      "evaluation_method": "auto",
+      "threshold": 0.8
+    },
+    {
+      "criterion_id": "capability_routing",
+      "criterion_name": "Correct Capability Routing",
+      "description": "Agent routes request to the correct capability (SQL/Quality/Exploration/Ingestion)",
+      "evaluation_method": "auto",
+      "threshold": 0.8
+    },
+    {
+      "criterion_id": "tool_trajectory",
+      "criterion_name": "Tool Usage Correctness",
+      "description": "Agent uses appropriate tools for the requested capability",
+      "evaluation_method": "auto",
+      "threshold": 0.7
+    },
+    {
+      "criterion_id": "response_format",
+      "criterion_name": "Response Format Quality",
+      "description": "Response is well-formatted, professional, and easy to understand",
+      "evaluation_method": "auto",
+      "threshold": 0.75
+    },
+    {
+      "criterion_id": "error_handling",
+      "criterion_name": "Error Handling",
+      "description": "Agent handles errors gracefully and provides helpful guidance",
+      "evaluation_method": "auto",
+      "threshold": 0.6
+    }
+  ],
+  "pass_fail_criteria": {
+    "pass_threshold": 0.75,
+    "fail_threshold": 0.5,
+    "required_criteria": ["response_relevance", "capability_routing"],
+    "summary": "Agent must achieve 75% overall score with minimum 80% on relevance and routing to pass"
+  }
+}
