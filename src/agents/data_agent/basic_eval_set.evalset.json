@@ -1,0 +1,182 @@
+{
+  "eval_set_id": "data_agent_core_functionality",
+  "eval_cases": [
+    {
+      "eval_id": "simple_lookup_list_tables",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "What tables are available in the database?"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "list_tables",
+                "args": {}
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "The database contains several tables:\n\n• **customers** - Contains customer master data including contact information, segments, and lifetime value\n• **products** - Product catalog with pricing, inventory, and supplier information\n• **sales_transactions** - Sales transaction records with customer, product, and payment details\n• **data_quality_metrics** - Historical tracking of data quality metrics over time\n• **pipeline_runs** - Pipeline execution history for data processing jobs\n\nWould you like to explore any of these tables in more detail?"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "conditional_filtering_describe_table",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "I need to understand the structure of the products table. Can you show me its schema with column names and data types?"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "describe_table",
+                "args": {
+                  "table_name": "products"
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "Here's the schema for the **products** table:\n\n**Columns:**\n- `product_id` (INTEGER, not null)\n- `product_name` (VARCHAR, nullable)\n- `category` (VARCHAR, not null)\n- `subcategory` (VARCHAR, not null)\n- `unit_price` (DECIMAL, not null)\n- `cost_price` (DECIMAL, not null)\n- `supplier_id` (INTEGER, not null)\n- `stock_quantity` (INTEGER, not null)\n- `reorder_level` (INTEGER, not null)\n- `scope_date` (DATE, not null)\n\nThe table contains product catalog information and currently has 200 rows."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "error_handling_nonexistent_table",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "Can you give me information about the 'inventory_snapshot' table?"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "get_table_info",
+                "args": {
+                  "table_name": "inventory_snapshot"
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "I couldn't find a table named 'inventory_snapshot' in the database. \n\nThe available tables are:\n- customers\n- products\n- sales_transactions\n- data_quality_metrics\n- pipeline_runs\n\nPerhaps you were looking for the **products** table? It contains inventory information including stock quantities. Would you like me to show you information about that table instead?"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "multi_turn_discovery_and_deep_dive",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "What data sources do we have?"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "list_tables",
+                "args": {}
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "The database contains several tables:\n\n• **customers** - Contains customer master data including contact information, segments, and lifetime value\n• **products** - Product catalog with pricing, inventory, and supplier information\n• **sales_transactions** - Sales transaction records with customer, product, and payment details\n• **data_quality_metrics** - Historical tracking of data quality metrics over time\n• **pipeline_runs** - Pipeline execution history for data processing jobs\n\nWould you like to explore any of these tables in more detail?"
+              }
+            ]
+          }
+        },
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "Tell me more about the sales_transactions table - I need to see what kind of quality issues it has"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "get_table_info",
+                "args": {
+                  "table_name": "sales_transactions"
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "Here's comprehensive information about the **sales_transactions** table:\n\n**Purpose:** Sales transaction records with customer, product, and payment details. Includes scope_date to track when data was ingested.\n\n**Schema:** Contains transaction_id, customer_id, product_id, transaction_date, quantity, unit_price, discount_percent, total_amount, payment_method, sales_channel, region, and scope_date.\n\n**⚠️ Quality Issues:**\nThis table contains intentional quality problems:\n- ~2% orphaned customers (customer_id doesn't exist in customers table)\n- ~2% orphaned products (product_id doesn't exist in products table)\n- ~1% future dates (transaction_date is in the future)\n- ~1% invalid discounts (discount_percent outside valid range)\n- ~2% calculation errors (total_amount doesn't match quantity × unit_price)\n- ~1% negative quantities\n- ~5% missing payment methods\n\nYou can use the scope_date column to identify which day's data has specific issues. This table is useful for revenue analysis and customer behavior tracking, but be aware of these data quality concerns."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "comprehensive_info_with_business_context",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "I'm new to this database. Can you explain what the customers table contains and whether I should be concerned about data quality?"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "get_table_info",
+                "args": {
+                  "table_name": "customers"
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "Great question! Here's what you need to know about the **customers** table:\n\n**What it contains:**\nCustomer master data including contact information and lifetime value. Includes scope_date to track when data was ingested.\n\n**Schema highlights:**\n- customer_id (INTEGER) - Unique identifier\n- customer_name (VARCHAR) - Name\n- email (VARCHAR) - Email address\n- phone (VARCHAR) - Phone number\n- country (VARCHAR) - Country location\n- registration_date (DATE) - Registration date\n- customer_segment (VARCHAR) - Customer segment\n- lifetime_value (DECIMAL) - Total lifetime value\n- scope_date (DATE) - Data ingestion date\n\n**⚠️ Data Quality Concerns - YES, be careful:**\n- ~10% missing emails\n- ~5% missing phones\n- ~5% duplicate records\n- ~2% outliers in lifetime_value\n\nThe scope_date field helps you identify which ingestion batch has which issues. It is recommended to clean or handle these data quality issues before analysis."
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

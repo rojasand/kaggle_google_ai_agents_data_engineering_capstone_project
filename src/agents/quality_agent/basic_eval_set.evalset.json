@@ -1,0 +1,189 @@
+{
+  "eval_set_id": "quality_agent_core_functionality",
+  
+  "eval_cases": [
+    {
+      "eval_id": "calculate_customer_quality_metrics",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "Calculate quality metrics for the customers table on 2025-01-15"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "calculate_quality_metrics",
+                "args": {
+                  "table_name": "customers",
+                  "logic_date": "2025-01-15"
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "**Data Quality Report for Customers (2025-01-15)**\n\nI've calculated quality metrics for the customers table. Here's what the data shows:\n\n**Completeness:** The email and phone fields show good coverage with most records populated.\n\n**Consistency:** Registration dates are properly formatted and within expected ranges.\n\n**Uniqueness:** Customer IDs are unique with no duplicates detected.\n\nOverall, the customer data quality is strong with no critical issues identified."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "calculate_product_quality_metrics",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "Check data quality for products table today"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "calculate_quality_metrics",
+                "args": {
+                  "table_name": "products",
+                  "logic_date": null
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "**Product Data Quality Assessment**\n\nThe product catalog shows excellent data quality:\n\n**Completeness:** Product names are 100% complete - every product has a name.\n\n**Validity:** Unit prices are positive and stock quantities are within acceptable ranges.\n\nThe product data is ready for business use with no data quality concerns."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "get_quality_metrics_by_scope_date",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "Show me all quality metrics calculated on 2025-01-01"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "get_quality_metrics_by_scope_date",
+                "args": {
+                  "scope_date": "2025-01-01"
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "Here are the quality metrics from 2025-01-01:\n\nMultiple tables were assessed on this date including customers, products, and sales_transactions. The metrics show overall good data quality across all tables with completeness scores above 95%."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "invalid_table_error",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "Calculate quality metrics for the invoices table"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "calculate_quality_metrics",
+                "args": {
+                  "table_name": "invoices",
+                  "logic_date": null
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "I cannot calculate quality metrics for the 'invoices' table because it's not in our supported list. I can analyze these tables: customers, products, and sales_transactions. Would you like me to check one of these instead?"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "multi_turn_quality_analysis",
+      "conversation": [
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "What scope dates are available?"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "list_available_scope_dates",
+                "args": {}
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "Available scope dates: 2025-01-01, 2025-01-15, 2025-02-01, 2025-03-01"
+              }
+            ]
+          }
+        },
+        {
+          "user_content": {
+            "parts": [
+              {
+                "text": "Show me customer metrics for 2025-01-01"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "get_quality_metrics_by_table",
+                "args": {
+                  "table_name": "customers",
+                  "scope_date": "2025-01-01"
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "**Customer Quality Metrics (2025-01-01)**\n\nThe metrics show strong data quality with high completeness and consistency scores. Email completeness is at 98%, phone numbers at 95%, and all records have valid registration dates."
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
