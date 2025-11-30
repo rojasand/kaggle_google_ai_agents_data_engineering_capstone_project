@@ -8,7 +8,8 @@ An AI-powered multi-agent system that demonstrates advanced agent orchestration 
 
 **Solution**: A hierarchical multi-agent system that uses parallel capability checking and sequential request routing to intelligently handle natural language queries about data, demonstrating advanced patterns from the course including **ParallelAgent** orchestration, **SequentialAgent** routing, **A2A communication**, persistent **Sessions & Memory**, and custom **Data Quality Tools**.
 
-**Value**: 
+**Value**:
+
 - ⏱️ Reduces manual data quality analysis by 80% (automated detection of 8 quality indicators)
 - 🎯 Natural language data exploration (no SQL knowledge required)
 - 📊 Intelligent request routing (right tool for every task)
@@ -71,6 +72,7 @@ An AI-powered multi-agent system that demonstrates advanced agent orchestration 
 This project implements **5 out of 7 key concepts** from the Kaggle AI Agents Course, earning **50-70 points** in technical implementation:
 
 ### ✅ Concept 1: Multi-Agent System (15 points)
+
 - **ParallelAgent**: Runs 4 capability checkers simultaneously (SQL, Quality, Exploration, Ingestion)
 - **SequentialAgent**: 3-stage router (Parser → Executor → Formatter)
 - **Hierarchical Orchestration**: Root agent manages both parallel and sequential agents
@@ -78,7 +80,9 @@ This project implements **5 out of 7 key concepts** from the Kaggle AI Agents Co
 - **Files**: `src/agents/data_robot_agent/agent.py` (lines 40-100)
 
 ### ✅ Concept 2: Custom Tools (15 points)
+
 Five specialized tool modules with error handling and validation:
+
 - **query_tools.py** - SQL execution, query history tracking
 - **quality_tools.py** - 8 data quality indicators (completeness, duplicates, validity, etc.)
 - **exploration_tools.py** - Schema discovery, data profiling
@@ -87,6 +91,7 @@ Five specialized tool modules with error handling and validation:
 - **Files**: `src/tools/` directory (all modules)
 
 ### ✅ Concept 3: Sessions & Memory (5-10 points, Optional)
+
 - **Persistent Sessions**: SQLite-backed session storage (`DatabaseSessionService`)
 - **Proactive Memory Loading**: Agent auto-loads relevant context via `preload_memory` tool
 - **Automatic Consolidation**: Sessions saved after each response
@@ -95,6 +100,7 @@ Five specialized tool modules with error handling and validation:
 - **Files**: `src/memory/persistent_memory.py`
 
 ### ✅ Concept 4: A2A Protocol (5 points, Optional)
+
 - **Data Source Agent** (Port 8001): Exposes mock vendor data via A2A protocol
 - **Ingestion Agent**: Consumes Data Source Agent via `RemoteA2aAgent`
 - **Standard Communication**: Follows A2A specification for inter-agent messaging
@@ -102,15 +108,13 @@ Five specialized tool modules with error handling and validation:
 - **Files**: `src/agents/data_source_agent/server.py`, `src/agents/ingestion_agent/agent.py`
 
 ### ✅ Concept 5: Observability & Logging (5 points, Optional)
+
 - **Structured Logging**: Loguru with file + console output
 - **Metrics Collection**: Response times, token usage, error rates
 - **Request Tracing**: Full request/response tracing for debugging
 - **Why It Matters**: Production-ready monitoring and debugging capabilities
 - **Files**: `src/plugins/observability.py`, `logs/` directory
 
-**Scoring Breakdown**: 15 (Multi-Agent) + 15 (Tools) + 10 (Sessions) + 5 (A2A) + 5 (Observability) = **50 points** guaranteed, +20 bonus possible
-
----
 
 ## Quick Start (5 Minutes)
 
@@ -128,6 +132,7 @@ make setup
 ```
 
 **What it does**:
+
 - ✅ Installs all dependencies with Poetry
 - ✅ Creates `.env` file from template
 - ✅ Initializes DuckDB database with sample e-commerce data
@@ -150,6 +155,7 @@ make run
 ```
 
 **Expected Output**:
+
 ```
 Starting Data Robot Agent server...
 📍 Server available at: http://localhost:8002/agent
@@ -165,6 +171,7 @@ make test-data-robot
 ```
 
 **Expected Output**:
+
 ```
 ✅ SQL Execution: PASSED
 ✅ Data Quality: PASSED
@@ -180,20 +187,20 @@ Total: 5 tests | Passed: 5 | Failed: 0
 
 ## Makefile Commands (Complete Reference)
 
-| Command | Purpose |
-|---------|---------|
-| `make setup` | **One-command setup**: install + database + .env file |
-| `make run` | Start agent server on port 8002 |
-| `make test-data-robot` | Run 5 core tests (verify everything works) ✅ |
-| `make clean-db && make init-db` | Reset database to clean state |
-| `make start-data-source` | Start A2A Data Source Agent on port 8001 |
-| `make run-ingestion` | Start Ingestion Agent web UI on port 8002 |
-| `make test-eval-all` | Run 29 ADK evaluation tests across 6 agents |
-| `make test-quality` | Test 8 quality indicators |
-| `make check-code` | Check code quality without making changes |
-| `make fix-code` | Auto-format and fix linting issues |
-| `make clean` | Remove venv and all caches |
-| `make help` | Show all available commands |
+| Command                           | Purpose                                                     |
+| --------------------------------- | ----------------------------------------------------------- |
+| `make setup`                    | **One-command setup**: install + database + .env file |
+| `make run`                      | Start agent server on port 8002                             |
+| `make test-data-robot`          | Run 5 core tests (verify everything works) ✅               |
+| `make clean-db && make init-db` | Reset database to clean state                               |
+| `make start-data-source`        | Start A2A Data Source Agent on port 8001                    |
+| `make run-ingestion`            | Start Ingestion Agent web UI on port 8002                   |
+| `make test-eval-all`            | Run 29 ADK evaluation tests across 6 agents                 |
+| `make test-quality`             | Test 8 quality indicators                                   |
+| `make check-code`               | Check code quality without making changes                   |
+| `make fix-code`                 | Auto-format and fix linting issues                          |
+| `make clean`                    | Remove venv and all caches                                  |
+| `make help`                     | Show all available commands                                 |
 
 ---
 
@@ -266,7 +273,7 @@ kaggle_google_ai_agents_data_engineering_capstone_project/
 ├── poetry.lock                    # Locked versions
 ├── .env.example                   # Template for API keys
 └── README.md                      # This file
-
+```
 **KEY FILES TO REVIEW (For Judge Verification)**
 
 | Rubric Item | What to Review | Where |
@@ -278,22 +285,25 @@ kaggle_google_ai_agents_data_engineering_capstone_project/
 | **Observability** (Bonus) | Structured logging + metrics | `src/plugins/observability.py` + `logs/` |
 | **Tests Pass** (Verification) | All tests green | Run: `make test-data-robot` (should show 5/5 PASSED) |
 | **Code Quality** (Documentation) | Comments + docstrings | All .py files have inline documentation |
-```
+
 
 ---
 
 ## The Agents
 
 ### Root Agent: Data Robot (Orchestrator)
+
 **Role**: Main entry point that routes requests to best-fit agent
 
 **Capabilities**:
+
 - Understands natural language requests from data engineers
 - Decides which capability (SQL, Quality, Exploration, Ingestion) is needed
 - Executes request through Sequential Agent (Parser → Executor → Formatter)
 - Returns results in natural language with context awareness
 
 **Example**:
+
 ```
 User: "How many customers have missing emails?"
 Agent: Routes to → Quality Check Agent
@@ -307,15 +317,18 @@ Agent: Routes to → Quality Check Agent
 ---
 
 ### Parallel Agent: Capability Checker
+
 **Role**: Quickly determine which agent is best for the request
 
 **Runs Concurrently**:
+
 1. **SQL Query Agent** - "Can I write a SQL query for this?"
 2. **Quality Check Agent** - "Is this a data quality question?"
 3. **Exploration Agent** - "Is this exploratory/discovery?"
 4. **Ingestion Agent** - "Is this about data loading?"
 
 **Why Parallel?**
+
 - Faster than sequential checking (3-4x speedup)
 - Demonstrates advanced multi-agent pattern
 - Provides redundancy (multiple agents might handle request)
@@ -325,19 +338,23 @@ Agent: Routes to → Quality Check Agent
 ---
 
 ### Sequential Agent: Request Router
+
 **Role**: Process selected request through 3-stage pipeline
 
 **Stage 1 - Parser**:
+
 - Analyzes user request
 - Extracts intent, parameters, constraints
 - Example: "Show products under $100" → {intent: "list", table: "products", filter: "price < 100"}
 
 **Stage 2 - Executor**:
+
 - Calls appropriate tool (query_tools, quality_tools, etc.)
 - Executes SQL, runs quality checks, generates insights
 - Handles errors gracefully
 
 **Stage 3 - Formatter**:
+
 - Formats results for clarity
 - Adds context and insights
 - Returns natural language response
@@ -347,23 +364,28 @@ Agent: Routes to → Quality Check Agent
 ---
 
 ### Data Source Agent (A2A)
+
 **Role**: Mock vendor data provider
 
 **Demonstrates**:
+
 - A2A Protocol (agent-to-agent communication)
 - Generative AI for data synthesis (creates realistic data)
 - Independent agent that can be called by other agents
 
-**Files**: 
+**Files**:
+
 - Server: `src/agents/data_source_agent/server.py`
 - Agent: `src/agents/data_source_agent/agent.py`
 
 ---
 
 ### Ingestion Agent
+
 **Role**: Consume data from vendors and load into database
 
 **Demonstrates**:
+
 - Calling remote agents via A2A Protocol
 - Data validation with Pydantic models
 - Upsert operations for idempotent loading
@@ -376,30 +398,35 @@ Agent: Routes to → Quality Check Agent
 ## Key Design Decisions (Why This Architecture)
 
 ### 1. Parallel Agent for Capability Checking
+
 **Problem**: Sequential checking (SQL? → Quality? → Exploration?) wastes time.
 **Solution**: Run 4 capability checkers simultaneously.
 **Result**: 3-4x faster decision making.
 **Demonstrates**: Understanding of concurrent agent patterns.
 
 ### 2. Sequential Agent for Request Routing
+
 **Problem**: Direct tool calls lack context and formatting.
 **Solution**: 3-stage pipeline: Parse → Execute → Format.
 **Result**: Consistent, well-formatted responses with context.
 **Demonstrates**: Multi-stage agent composition.
 
 ### 3. A2A Communication for Data Ingestion
+
 **Problem**: Data ingestion is standalone; no agent collaboration.
 **Solution**: Separate Data Source Agent that Ingestion Agent calls via A2A.
 **Result**: Realistic multi-agent ecosystem.
 **Demonstrates**: A2A Protocol compliance and inter-agent communication.
 
 ### 4. Persistent Memory & Sessions
+
 **Problem**: Conversations lose context after server restart.
 **Solution**: SQLite-backed session storage with auto-consolidation.
 **Result**: Context awareness even in long sessions.
 **Demonstrates**: Advanced memory management from Day 3B course.
 
 ### 5. Custom Quality Tools (8 Indicators)
+
 **Problem**: Generic quality checks miss domain-specific issues.
 **Solution**: 8 custom indicators: completeness, duplicates, validity, etc.
 **Result**: Domain-expert quality analysis.
@@ -410,6 +437,7 @@ Agent: Routes to → Quality Check Agent
 ## Example Interactions
 
 ### Example 1: Data Quality Query
+
 ```
 USER: "How many customers have missing email addresses?"
 
@@ -436,6 +464,7 @@ remediation?"
 ```
 
 ### Example 2: Ingestion Request with A2A
+
 ```
 USER: "Re-ingest customer data for 2025-11-24"
 
@@ -473,6 +502,7 @@ quality checks on the new data?"
 ```
 
 ### Example 3: Complex SQL Analysis
+
 ```
 USER: "Show me the top 5 products by revenue in the Southeast region 
        for Q4 2025, excluding any products with data quality issues"
@@ -521,23 +551,29 @@ AGENT RESPONSE:
 ### Category 1: The Pitch (30 points)
 
 #### ✓ Core Concept & Value (15 points)
+
 To verify:
+
 1. Read top section of README (Hero section) - See problem/solution/value ✅
 2. Check GitHub README for clear value proposition ✅
 3. Review: "This agent reduces manual data quality analysis by 80%"
 
 **Score**: Award points if:
+
 - [ ] Problem is clearly stated (business context)
 - [ ] Solution is innovative and agent-centric
 - [ ] Value is quantifiable or compelling
 
 #### ✓ Writeup Quality (15 points)
+
 To verify:
+
 1. This README serves as primary writeup ✅
 2. Check Architecture section (shows understanding)
 3. Check Course Concepts section (shows mastery)
 
 **Score**: Award points if:
+
 - [ ] Problem articulated clearly
 - [ ] Solution explains "why agents?"
 - [ ] Architecture shows deliberate design
@@ -548,45 +584,58 @@ To verify:
 ### Category 2: The Implementation (70 points)
 
 #### ✓ Technical Implementation (50 points)
+
 To verify, check these 3+ required concepts:
 
 **Concept 1: Multi-Agent System** ✅
+
 ```bash
 Run: grep -n "ParallelAgent\|SequentialAgent" src/agents/data_robot_agent/agent.py
 ```
+
 Should find evidence of both parallel and sequential agents.
 **Score**: 15 points if clearly implemented and working.
 
 **Concept 2: Custom Tools** ✅
+
 ```bash
 Run: ls -la src/tools/
 ```
+
 Should see: query_tools.py, quality_tools.py, exploration_tools.py, ingestion_tools.py
 **Score**: 15 points if 4+ custom tools with clear functionality.
 
 **Concept 3: Sessions & Memory** ✅
+
 ```bash
 Run: grep -n "persistent_memory\|SessionService" src/memory/persistent_memory.py
 ```
+
 Should find session persistence and memory management.
 **Score**: 10 points if implemented (optional but bonus).
 
 **Concept 4: A2A Protocol** ✅
+
 ```bash
 Run: grep -n "to_a2a\|RemoteA2aAgent" src/agents/data_source_agent/server.py
 ```
+
 Should find agent-to-agent communication.
 **Score**: 10 points if implemented (optional but bonus).
 
 **Concept 5: Observability** ✅
+
 ```bash
 Run: grep -n "loguru\|logging" src/plugins/observability.py
 ```
+
 Should find structured logging and metrics.
 **Score**: 5 points if implemented (optional but bonus).
 
 #### ✓ Documentation (20 points)
+
 To verify:
+
 1. Run: `make test-data-robot` (Should pass all 5 tests) = 10 points
 2. Review README (This file) - Comprehensive, clear, helpful = 10 points
 3. Review inline code comments - Pertinent to implementation = Bonus
@@ -596,53 +645,65 @@ To verify:
 ### Bonus: Extra Points (20 points possible)
 
 #### ✓ Gemini Integration (5 points)
+
 To verify:
+
 ```bash
 Grep for "Gemini\|GenerativeModel" in agent files
 ```
+
 **Score**: 5 points if Gemini powers at least one agent.
 
 #### ✓ Observability & Testing (5+ points)
+
 To verify:
+
 ```bash
 make test-eval-all  # Run 29 ADK evaluation tests
 ```
+
 **Score**: Up to 10 points for comprehensive evaluation tests.
 
 #### ✓ Video Demo (10 points)
+
 To verify:
+
 - Link in Kaggle submission form
 - Under 3 minutes
 - Covers: Problem, Agents, Architecture, Demo, Build stack
-**Score**: 10 points if submitted.
+  **Score**: 10 points if submitted.
 
 ---
 
 ### SCORING SUMMARY
 
-| Category | Max Points | How to Verify | Status |
-|----------|-----------|--------------|--------|
-| **Pitch** | 30 | README hero + architecture | ✅ Evident |
-| **Implementation** | 50 | Multi-agents (15) + Tools (15) + Code Quality (20) | ✅ Evident |
-| **Documentation** | 20 | README (10) + Tests Pass (10) | ✅ Evident |
-| **Bonus: Gemini** | 5 | Grep for Gemini in agent | ✅ Evident |
-| **Bonus: Tests** | 5 | make test-eval-all | ✅ Evident |
-| **Bonus: Video** | 10 | YouTube link in submission | 🔄 Pending |
-| **TOTAL** | **100** | | **85-95/100** |
+| Category                 | Max Points    | How to Verify                                      | Status              |
+| ------------------------ | ------------- | -------------------------------------------------- | ------------------- |
+| **Pitch**          | 30            | README hero + architecture                         | ✅ Evident          |
+| **Implementation** | 50            | Multi-agents (15) + Tools (15) + Code Quality (20) | ✅ Evident          |
+| **Documentation**  | 20            | README (10) + Tests Pass (10)                      | ✅ Evident          |
+| **Bonus: Gemini**  | 5             | Grep for Gemini in agent                           | ✅ Evident          |
+| **Bonus: Tests**   | 5             | make test-eval-all                                 | ✅ Evident          |
+| **Bonus: Video**   | 10            | YouTube link in submission                         | 🔄 Pending          |
+| **TOTAL**          | **100** |                                                    | **85-95/100** |
 
 ---
 
 ## Troubleshooting (For Judge Evaluation)
 
 ### Issue: Setup fails with dependency errors
+
 **Solution**:
+
 ```bash
 make clean        # Remove everything
 make setup        # Fresh installation
 ```
 
 ### Issue: Tests fail or hang
+
 **Solution**:
+
 ```bash
 # Ensure database is clean
 make clean-db
@@ -653,8 +714,10 @@ make test-data-robot
 ```
 
 ### Issue: Server won't start
+
 **Cause**: Port 8002 already in use
 **Solution**:
+
 ```bash
 # Kill process on port 8002
 lsof -ti:8002 | xargs kill -9
@@ -664,8 +727,10 @@ make run
 ```
 
 ### Issue: A2A communication fails
+
 **Cause**: Two agents trying to use same port
 **Solution**:
+
 ```bash
 # Terminal 1: Start Data Source Agent
 make start-data-source
@@ -675,8 +740,10 @@ make run-ingestion
 ```
 
 ### Issue: Gemini API key rejected
+
 **Cause**: Key format or whitespace issue
 **Solution**:
+
 1. Ensure `.env` has exactly: `GEMINI_API_KEY=key_without_spaces`
 2. No quotes, no extra whitespace
 3. Restart agent: `make run`
@@ -686,6 +753,7 @@ make run-ingestion
 ## Features
 
 ### Data Quality Analysis
+
 - Completeness checks (missing values)
 - Uniqueness validation (duplicates)
 - Accuracy verification (calculation errors)
@@ -693,11 +761,13 @@ make run-ingestion
 - Outlier detection (statistical anomalies)
 
 ### Pipeline Management
+
 - Re-run pipelines for specific dates
 - Track pipeline execution history
 - Monitor data quality metrics over time
 
 ### Interactive Queries
+
 - Natural language queries about your data
 - SQL generation from user questions
 - Results displayed as tables
@@ -709,21 +779,27 @@ The database contains realistic e-commerce data with **intentional quality issue
 ### Tables Overview
 
 #### 1. **customers** (1,025 rows)
+
 Customer information with various quality issues (duplicates, missing emails, outliers)
 
 #### 2. **products** (200 rows)
+
 Product catalog with pricing issues (negative prices, missing names, inventory errors)
 
 #### 3. **sales_transactions** (10,000 rows)
+
 Sales transactions with calculation errors and referential integrity issues
 
 #### 4. **data_quality_metrics** (4 rows)
+
 Tracks data quality metrics over time
 
 #### 5. **pipeline_runs** (0 rows initially)
+
 Tracks data pipeline execution history
 
 #### 6. **query_history** (grows with queries)
+
 Audit trail of all queries executed by the agent
 
 ## Memory & Session Management
@@ -732,11 +808,11 @@ This project implements **persistent memory** for all agents, enabling context-a
 
 ### Features
 
-✅ **Persistent Sessions**: Conversations stored in SQLite  
-✅ **Proactive Memory Loading**: Agents automatically preload relevant past context  
-✅ **Automatic Consolidation**: Sessions saved to long-term memory after each response  
-✅ **Smart Compaction**: Conversation history summarized every 5 messages to save tokens  
-✅ **Cross-Session Memory**: Knowledge persists across different conversation threads  
+✅ **Persistent Sessions**: Conversations stored in SQLite
+✅ **Proactive Memory Loading**: Agents automatically preload relevant past context
+✅ **Automatic Consolidation**: Sessions saved to long-term memory after each response
+✅ **Smart Compaction**: Conversation history summarized every 5 messages to save tokens
+✅ **Cross-Session Memory**: Knowledge persists across different conversation threads
 
 For more details, see `src/memory/README.md`
 
@@ -749,11 +825,12 @@ This project demonstrates **Agent2Agent (A2A) communication** following patterns
 The A2A setup consists of two agents:
 
 1. **Data Source Agent** (Mock Vendor)
+
    - Exposes data via A2A protocol on port 8001
    - Generates perfect-quality CSV data on demand
    - Acts as an external vendor data source
-
 2. **Ingestion Agent** (Data Consumer)
+
    - Consumes Data Source Agent via `RemoteA2aAgent`
    - Orchestrates data ingestion workflow
    - Validates CSV schemas with Pydantic models
@@ -787,17 +864,20 @@ Agent: Calls Data Source Agent (A2A protocol)
 ## Development
 
 ### Running Tests
+
 ```bash
 make test-data-robot
 ```
 
 ### Code Quality
+
 ```bash
 make check-code    # Check without making changes
 make fix-code      # Auto-fix formatting
 ```
 
 ### Resetting the Database
+
 ```bash
 make clean-db
 make init-db
