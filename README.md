@@ -27,6 +27,7 @@ An AI-powered multi-agent system that demonstrates advanced agent orchestration 
 - [Sample Data](#sample-data)
 - [Memory & Session Management](#memory--session-management)
 - [Agent2Agent (A2A) Data Ingestion](#agent2agent-a2a-data-ingestion)
+- [DuckDB Database Schema](#duckdb-database-schema)
 - [Development](#development)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
@@ -959,6 +960,448 @@ User: "Re-ingest customers for 2025-11-24"
 Agent: Calls Data Source Agent (A2A protocol)
        Validates and loads data
        Returns success summary
+```
+
+---
+
+## DuckDB Database Schema
+
+The project uses DuckDB as its analytical database. Below is a complete guide to the tables, columns, relationships, and how to join them.
+
+### Database Overview
+
+```
+customers (1,025 rows)
+    ├─ PRIMARY KEY: customer_id
+    └─ References: Used in sales_transactions via customer_id
+
+products (200 rows)
+    ├─ PRIMARY KEY: product_id
+    └─ References: Used in sales_transactions via product_id
+
+sales_transactions (10,000 rows)
+    ├─ PRIMARY KEY: transaction_id
+    ├─ FOREIGN KEY: customer_id → customers
+    └─ FOREIGN KEY: product_id → products
+
+data_quality_metrics (4+ rows)
+    ├─ PRIMARY KEY: metric_id
+    └─ Tracks quality scores across tables and time
+
+pipeline_runs (0+ rows)
+    ├─ PRIMARY KEY: run_id
+    └─ Tracks data ingestion pipeline execution
+
+query_history (grows with queries)
+    └─ Audit trail of all executed SQL queries
+```
+
+---
+
+### Table 1: `customers`
+
+**Purpose**: Customer master data (1,025 records)
+
+**Columns**:
+
+| Column | Type | Description | Nullable | Example |
+|--------|------|-------------|----------|---------|
+| `customer_id` | INTEGER | Unique customer identifier (PK) | No | 1001 |
+| `customer_name` | VARCHAR | Full customer name | No | "John Smith" |
+| `email` | VARCHAR | Email address | **Yes** | "john@example.com" |
+| `phone` | VARCHAR | Phone number | **Yes** | "+1-555-0100" |
+| `country` | VARCHAR | Country of residence | **Yes** | "USA" |
+| `registration_date` | DATE | Account creation date | No | 2024-01-15 |
+| `customer_segment` | VARCHAR | Customer tier | No | "Premium", "Standard", "Basic", "VIP" |
+| `lifetime_value` | DECIMAL(10,2) | Total customer spend | No | 5234.99 |
+| `scope_date` | DATE | Data ingestion date | No | 2025-01-01 |
+
+**Key Features**:
+
+- **Intentional Quality Issues** (Phase 1, 2025-01-01): ~40 customers missing emails (8% incomplete)
+- **Corrected** (Phase 2, 2025-02-01): All emails populated (100% complete)
+- **Segments**: Premium, Standard, Basic, VIP for segmentation queries
+
+**Query Examples**:
+
+```sql
+-- Count customers by segment
+SELECT customer_segment, COUNT(*) as count
+FROM customers
+WHERE scope_date = '2025-02-01'
+GROUP BY customer_segment;
+
+-- Find customers with missing emails
+SELECT COUNT(*) as missing_emails
+FROM customers
+WHERE email IS NULL AND scope_date = '2025-01-01';
+
+-- Top 10 customers by lifetime value
+SELECT customer_name, lifetime_value
+FROM customers
+WHERE scope_date = '2025-02-01'
+ORDER BY lifetime_value DESC
+LIMIT 10;
+```
+
+---
+
+### Table 2: `products`
+
+**Purpose**: Product catalog (200 records)
+
+**Columns**:
+
+| Column | Type | Description | Nullable | Example |
+|--------|------|-------------|----------|---------|
+| `product_id` | INTEGER | Unique product identifier (PK) | No | 2001 |
+| `product_name` | VARCHAR | Product name | **Yes** | "Premium Widget Pro" |
+| `category` | VARCHAR | Main category | No | "Electronics", "Home & Garden", "Sports" |
+| `subcategory` | VARCHAR | Product subcategory | No | "Gadgets", "Furniture", "Equipment" |
+| `unit_price` | DECIMAL(10,2) | Selling price | No | 99.99 |
+| `cost_price` | DECIMAL(10,2) | Cost of goods | No | 49.99 |
+| `supplier_id` | INTEGER | Supplier reference | No | 501 |
+| `stock_quantity` | INTEGER | Current inventory | No | 250 |
+| `reorder_level` | INTEGER | Reorder threshold | No | 50 |
+| `scope_date` | DATE | Data ingestion date | No | 2025-02-01 |
+
+**Key Features**:
+
+- **Intentional Quality Issues** (Phase 1, 2025-01-01): ~20 products with missing names (10% incomplete)
+- **Corrected** (Phase 2, 2025-02-01): All product names populated
+- **Margin Calculation**: `margin = unit_price - cost_price`
+- **Stock Status**: Compare `stock_quantity` vs `reorder_level` for reorder alerts
+
+**Query Examples**:
+
+```sql
+-- Products below reorder level (stock shortage)
+SELECT product_id, product_name, stock_quantity, reorder_level
+FROM products
+WHERE stock_quantity <= reorder_level AND scope_date = '2025-02-01'
+ORDER BY stock_quantity;
+
+-- Profit margin by category
+SELECT 
+    category,
+    AVG(unit_price - cost_price) as avg_margin,
+    COUNT(*) as product_count
+FROM products
+WHERE scope_date = '2025-02-01'
+GROUP BY category
+ORDER BY avg_margin DESC;
+
+-- High-margin products (>50% profit)
+SELECT product_name, unit_price, cost_price,
+       ROUND((unit_price - cost_price) / unit_price * 100, 2) as margin_percent
+FROM products
+WHERE (unit_price - cost_price) / unit_price > 0.5
+  AND scope_date = '2025-02-01'
+ORDER BY margin_percent DESC;
+```
+
+---
+
+### Table 3: `sales_transactions`
+
+**Purpose**: Individual sales records (10,000 transactions)
+
+**Columns**:
+
+| Column | Type | Description | Nullable | Example |
+|--------|------|-------------|----------|---------|
+| `transaction_id` | INTEGER | Unique transaction ID (PK) | No | 10001 |
+| `customer_id` | INTEGER | **FK to customers** | No | 1001 |
+| `product_id` | INTEGER | **FK to products** | No | 2001 |
+| `transaction_date` | DATE | Date of sale | No | 2025-02-15 |
+| `quantity` | INTEGER | Items purchased | No | 3 |
+| `unit_price` | DECIMAL(10,2) | Price at time of sale | No | 99.99 |
+| `discount_percent` | DECIMAL(5,2) | Discount applied | No | 10.00 |
+| `total_amount` | DECIMAL(10,2) | Final transaction amount | No | 269.97 |
+| `payment_method` | VARCHAR | Payment type | **Yes** | "Credit Card", "PayPal", "Bank Transfer" |
+| `sales_channel` | VARCHAR | Where purchased | No | "Online", "Store", "Mobile", "Phone" |
+| `region` | VARCHAR | Sales region | No | "North", "South", "East", "West" |
+| `scope_date` | DATE | Data ingestion date | No | 2025-02-01 |
+
+**Key Features**:
+
+- **Foreign Keys**: Links customers and products
+- **Intentional Quality Issues** (Phase 1): ~500 orphaned transactions (customer_id not in customers table)
+- **Corrected** (Phase 2): All customer_id and product_id references valid
+- **Calculated Field**: `revenue = quantity * unit_price * (1 - discount_percent/100)`
+
+**Query Examples**:
+
+```sql
+-- Total revenue by region
+SELECT region, SUM(total_amount) as total_revenue
+FROM sales_transactions
+WHERE scope_date = '2025-02-01'
+GROUP BY region
+ORDER BY total_revenue DESC;
+
+-- Top 5 products by sales volume
+SELECT p.product_name, COUNT(st.transaction_id) as sales_count, SUM(st.total_amount) as revenue
+FROM sales_transactions st
+JOIN products p ON st.product_id = p.product_id
+WHERE st.scope_date = '2025-02-01'
+GROUP BY p.product_id, p.product_name
+ORDER BY revenue DESC
+LIMIT 5;
+
+-- Customer purchase behavior
+SELECT 
+    c.customer_id,
+    c.customer_name,
+    c.customer_segment,
+    COUNT(st.transaction_id) as purchase_count,
+    SUM(st.total_amount) as customer_total,
+    AVG(st.total_amount) as avg_purchase
+FROM customers c
+LEFT JOIN sales_transactions st ON c.customer_id = st.customer_id
+WHERE c.scope_date = '2025-02-01' AND st.scope_date = '2025-02-01'
+GROUP BY c.customer_id, c.customer_name, c.customer_segment
+ORDER BY customer_total DESC;
+```
+
+---
+
+### Table 4: `data_quality_metrics`
+
+**Purpose**: Quality score history (tracks data health over time)
+
+**Columns**:
+
+| Column | Type | Description | Nullable | Example |
+|--------|------|-------------|----------|---------|
+| `metric_id` | INTEGER | Unique metric ID (PK) | No | 1 |
+| `table_name` | VARCHAR | Table being measured | No | "customers", "products", "sales_transactions" |
+| `metric_name` | VARCHAR | Metric type | No | "completeness", "uniqueness", "accuracy", etc. |
+| `metric_value` | DECIMAL(5,4) | Quality score (0-1) | No | 0.9200 |
+| `calculation_date` | TIMESTAMP | When calculated | No | 2025-02-01 12:34:56 |
+| `logic_date` | DATE | Data date being measured | No | 2025-02-01 |
+| `status` | VARCHAR | Calculation status | No | "success", "failed" |
+
+**Key Features**:
+
+- **8 Quality Metrics Tracked**:
+  1. **Completeness** - Percentage of non-null values
+  2. **Uniqueness** - Percentage of unique records
+  3. **Accuracy** - Percentage of valid format records
+  4. **Cardinality** - Distinct value counts
+  5. **Outliers** - Records beyond statistical bounds
+  6. **Distribution Drift** - Change in value distribution over time
+  7. **Temporal Consistency** - Date value patterns
+  8. **Referential Integrity** - Foreign key violations
+
+**Query Examples**:
+
+```sql
+-- Quality trends over time
+SELECT table_name, metric_name, logic_date, metric_value
+FROM data_quality_metrics
+WHERE metric_name = 'completeness'
+ORDER BY table_name, logic_date;
+
+-- Current quality score by table
+SELECT table_name, AVG(metric_value) as avg_quality
+FROM data_quality_metrics
+WHERE logic_date = (SELECT MAX(logic_date) FROM data_quality_metrics)
+GROUP BY table_name
+ORDER BY avg_quality DESC;
+
+-- Quality degradation check (Phase 1 vs Phase 2)
+SELECT table_name, metric_name, 
+       MAX(CASE WHEN logic_date = '2025-01-01' THEN metric_value END) as phase1_value,
+       MAX(CASE WHEN logic_date = '2025-02-01' THEN metric_value END) as phase2_value
+FROM data_quality_metrics
+GROUP BY table_name, metric_name;
+```
+
+---
+
+### Table 5: `pipeline_runs`
+
+**Purpose**: Data ingestion pipeline execution history
+
+**Columns**:
+
+| Column | Type | Description | Nullable | Example |
+|--------|------|-------------|----------|---------|
+| `run_id` | INTEGER | Unique run ID (PK) | No | 1 |
+| `pipeline_name` | VARCHAR | Pipeline identifier | No | "customer_ingestion", "product_sync" |
+| `logic_date` | DATE | Data date processed | No | 2025-02-01 |
+| `start_time` | TIMESTAMP | When pipeline started | No | 2025-02-01 08:00:00 |
+| `end_time` | TIMESTAMP | When pipeline completed | **Yes** | 2025-02-01 08:15:30 |
+| `status` | VARCHAR | Final status | No | "success", "failed", "running" |
+| `records_processed` | INTEGER | Total records handled | No | 1025 |
+| `errors_count` | INTEGER | Error count | No | 0 |
+| `run_by` | VARCHAR | User/system identifier | No | "data_source_agent", "ingestion_agent" |
+
+**Query Examples**:
+
+```sql
+-- Pipeline performance metrics
+SELECT pipeline_name, COUNT(*) as run_count, AVG(records_processed) as avg_records
+FROM pipeline_runs
+WHERE status = 'success'
+GROUP BY pipeline_name;
+
+-- Recent pipeline runs (last 7 days)
+SELECT run_id, pipeline_name, logic_date, status, records_processed, errors_count
+FROM pipeline_runs
+WHERE start_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+ORDER BY start_time DESC;
+```
+
+---
+
+### Table 6: `query_history`
+
+**Purpose**: Audit trail of all executed queries
+
+**Columns**:
+
+| Column | Type | Description | Nullable | Example |
+|--------|------|-------------|----------|---------|
+| `query_id` | INTEGER | Unique query ID | **Yes** | 42 |
+| `session_id` | VARCHAR | User/session identifier | No | "session_abc123" |
+| `query_text` | TEXT | The SQL query executed | No | "SELECT * FROM customers..." |
+| `execution_status` | VARCHAR | Execution result | No | "success", "error" |
+| `rows_returned` | INTEGER | Rows in result set | **Yes** | 1025 |
+| `error_message` | TEXT | Error details if failed | **Yes** | "Table not found" |
+| `creation_timestamp` | DATE | Query execution date | No | 2025-02-01 |
+
+---
+
+### How to Join the Tables
+
+#### Join 1: Customers + Transactions (Most Common)
+
+```sql
+-- Get customer names with their transactions
+SELECT 
+    c.customer_name,
+    c.customer_segment,
+    st.transaction_id,
+    st.transaction_date,
+    st.total_amount
+FROM customers c
+INNER JOIN sales_transactions st ON c.customer_id = st.customer_id
+WHERE c.scope_date = '2025-02-01' AND st.scope_date = '2025-02-01'
+ORDER BY c.customer_id, st.transaction_date;
+```
+
+#### Join 2: Products + Transactions
+
+```sql
+-- Get product details with sales
+SELECT 
+    p.product_name,
+    p.category,
+    p.unit_price,
+    COUNT(st.transaction_id) as sales_count,
+    SUM(st.total_amount) as total_revenue
+FROM products p
+LEFT JOIN sales_transactions st ON p.product_id = st.product_id
+WHERE p.scope_date = '2025-02-01' AND st.scope_date = '2025-02-01'
+GROUP BY p.product_id, p.product_name, p.category, p.unit_price
+ORDER BY total_revenue DESC;
+```
+
+#### Join 3: Three-Table Join (Customers + Products + Transactions)
+
+```sql
+-- Complete customer purchase history
+SELECT 
+    c.customer_name,
+    c.customer_segment,
+    p.product_name,
+    p.category,
+    st.transaction_date,
+    st.quantity,
+    st.unit_price,
+    st.total_amount
+FROM customers c
+INNER JOIN sales_transactions st ON c.customer_id = st.customer_id
+INNER JOIN products p ON st.product_id = p.product_id
+WHERE c.scope_date = '2025-02-01' 
+  AND st.scope_date = '2025-02-01'
+  AND p.scope_date = '2025-02-01'
+ORDER BY c.customer_id, st.transaction_date;
+```
+
+#### Join 4: Detect Referential Integrity Issues
+
+```sql
+-- Find orphaned transactions (quality check)
+SELECT st.transaction_id, st.customer_id
+FROM sales_transactions st
+LEFT JOIN customers c ON st.customer_id = c.customer_id AND c.scope_date = st.scope_date
+WHERE c.customer_id IS NULL  -- No matching customer found
+  AND st.scope_date = '2025-01-01';  -- Phase 1 has issues
+
+-- Find orphaned products
+SELECT st.transaction_id, st.product_id
+FROM sales_transactions st
+LEFT JOIN products p ON st.product_id = p.product_id AND p.scope_date = st.scope_date
+WHERE p.product_id IS NULL  -- No matching product found
+  AND st.scope_date = '2025-01-01';
+```
+
+---
+
+### Query Patterns by Use Case
+
+#### Use Case 1: Revenue Analysis by Region & Product
+
+```sql
+SELECT 
+    st.region,
+    p.category,
+    p.product_name,
+    SUM(st.total_amount) as revenue,
+    COUNT(st.transaction_id) as transaction_count,
+    AVG(st.total_amount) as avg_transaction
+FROM sales_transactions st
+JOIN products p ON st.product_id = p.product_id
+WHERE st.scope_date = '2025-02-01'
+GROUP BY st.region, p.category, p.product_name
+ORDER BY st.region, revenue DESC;
+```
+
+#### Use Case 2: Customer Segmentation Analysis
+
+```sql
+SELECT 
+    c.customer_segment,
+    COUNT(DISTINCT c.customer_id) as customer_count,
+    SUM(st.total_amount) as segment_revenue,
+    AVG(st.total_amount) as avg_purchase_value,
+    COUNT(st.transaction_id) as total_purchases
+FROM customers c
+LEFT JOIN sales_transactions st ON c.customer_id = st.customer_id AND st.scope_date = c.scope_date
+WHERE c.scope_date = '2025-02-01'
+GROUP BY c.customer_segment
+ORDER BY segment_revenue DESC;
+```
+
+#### Use Case 3: Inventory & Stock Management
+
+```sql
+SELECT 
+    p.product_name,
+    p.category,
+    p.stock_quantity,
+    p.reorder_level,
+    CASE 
+        WHEN p.stock_quantity <= p.reorder_level THEN 'REORDER'
+        WHEN p.stock_quantity <= p.reorder_level * 1.5 THEN 'LOW'
+        ELSE 'OK'
+    END as stock_status
+FROM products p
+WHERE p.scope_date = '2025-02-01'
+ORDER BY p.stock_quantity ASC;
 ```
 
 ---
