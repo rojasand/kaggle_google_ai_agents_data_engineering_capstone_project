@@ -1,5 +1,7 @@
 # 🤖 Data Robot Agent: Enterprise AI for Data Engineering
 
+**⚡ Jump directly to execution → [Quick Start (5 Minutes)](#quick-start-5-minutes)**
+
 An AI-powered multi-agent system that demonstrates advanced agent orchestration patterns for data quality analysis, intelligent query routing, and enterprise data management. Built for the [Kaggle 5-Day AI Agents Intensive Course](https://www.kaggle.com/learn-guide/5-day-agents) Capstone Project (Enterprise Agents Track).
 
 ## 📑 Table of Contents
