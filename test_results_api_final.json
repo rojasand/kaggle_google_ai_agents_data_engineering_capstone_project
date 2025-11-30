@@ -1,4 +1,0 @@
-{
-  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "test_suite": "Data Robot Agent API Tests",
-  "results": [
