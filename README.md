@@ -2,6 +2,35 @@
 
 An AI-powered multi-agent system that demonstrates advanced agent orchestration patterns for data quality analysis, intelligent query routing, and enterprise data management. Built for the [Kaggle 5-Day AI Agents Intensive Course](https://www.kaggle.com/learn-guide/5-day-agents) Capstone Project (Enterprise Agents Track).
 
+## 📑 Table of Contents
+
+- [Problem → Solution → Value](#problem--solution--value)
+- [Quick Architecture Overview](#quick-architecture-overview)
+- [Tech Stack](#tech-stack)
+- [✅ Course Concepts Demonstrated](#-course-concepts-demonstrated-rubric-alignment)
+  - [Concept 1: Multi-Agent System](#-concept-1-multi-agent-system-15-points)
+  - [Concept 2: Custom Tools](#-concept-2-custom-tools-15-points)
+  - [Concept 3: Sessions & Memory](#-concept-3-sessions--memory-5-10-points-optional)
+  - [Concept 4: Agent2Agent Communication](#-concept-4-agent2agent-communication-10-points-optional)
+  - [Concept 5: Observability & Metrics](#-concept-5-observability--metrics-5-10-points-optional)
+- [Quick Start (5 Minutes)](#quick-start-5-minutes)
+- [Makefile Commands (Complete Reference)](#makefile-commands-complete-reference)
+- [Project Structure (For Judges)](#project-structure-for-judges)
+- [The Agents](#the-agents)
+- [Key Design Decisions](#key-design-decisions-why-this-architecture)
+- [Example Interactions](#example-interactions)
+- [✅ Rubric Verification Checklist](#-rubric-verification-checklist-for-judges)
+- [Troubleshooting (For Judge Evaluation)](#troubleshooting-for-judge-evaluation)
+- [Features](#features)
+- [Sample Data](#sample-data)
+- [Memory & Session Management](#memory--session-management)
+- [Agent2Agent (A2A) Data Ingestion](#agent2agent-a2a-data-ingestion)
+- [Development](#development)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
+
+---
+
 ## Problem → Solution → Value
 
 **Problem**: Data engineers waste hours manually analyzing data quality, querying databases across scattered systems, and managing ingestion pipelines. Data quality issues go undetected, leading to downstream errors and lost trust in analytics.
